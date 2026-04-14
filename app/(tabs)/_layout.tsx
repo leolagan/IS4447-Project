@@ -40,6 +40,15 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="categories"
+        options={{
+          title: 'Categories',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="pricetag-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
