@@ -1,6 +1,6 @@
-import ColorPicker from '@/components/ui/ColorPicker';
+import ColourPicker from '@/components/ui/ColourPicker';
 import FormField from '@/components/ui/FormField';
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ export default function EditCategoryScreen() {
   const { categories, updateCategory } = useCategories();
 
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#FF6B6B');
+  const [colour, setColour] = useState('#FF6B6B');
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function EditCategoryScreen() {
       const cat = categories.find(c => c.id === Number(id));
       if (cat) {
         setName(cat.name);
-        setColor(cat.color);
+        setColour(cat.colour);
         setLoaded(true);
       }
     }
@@ -31,7 +31,7 @@ export default function EditCategoryScreen() {
       Alert.alert('Error', 'Please enter a category name.');
       return;
     }
-    await updateCategory(Number(id), name.trim(), color);
+    await updateCategory(Number(id), name.trim(), colour);
     router.back();
   }
 
@@ -46,10 +46,10 @@ export default function EditCategoryScreen() {
         onChangeText={setName}
       />
 
-      <ColorPicker selectedColor={color} onSelect={setColor} />
+      <ColourPicker selectedColour={colour} onSelect={setColour} />
 
       <View style={styles.preview}>
-        <View style={[styles.previewSwatch, { backgroundColor: color }]} />
+        <View style={[styles.previewSwatch, { backgroundColor: colour }]} />
         <Text style={styles.previewName}>{name || 'Preview'}</Text>
       </View>
 
@@ -65,12 +65,12 @@ export default function EditCategoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
-  title:        { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColors.text },
+  container:    { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  title:        { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
   preview: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: AppColors.card,
+    backgroundColor: AppColours.card,
     borderRadius: 12,
     padding: 14,
     marginBottom: 24,
@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   previewSwatch: { width: 28, height: 28, borderRadius: 14 },
-  previewName:   { fontSize: 16, fontWeight: '600', color: AppColors.text },
-  saveBtn:       { backgroundColor: AppColors.edit, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
+  previewName:   { fontSize: 16, fontWeight: '600', color: AppColours.text },
+  saveBtn:       { backgroundColor: AppColours.edit, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
   saveBtnText:   { color: '#fff', fontSize: 16, fontWeight: '600' },
-  cancel:        { textAlign: 'center', color: AppColors.subtext, fontSize: 16, padding: 16 },
+  cancel:        { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

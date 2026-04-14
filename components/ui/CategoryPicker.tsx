@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 type Category = {
   id: number;
   name: string;
-  color: string;
+  colour: string;
 };
 
 type Props = {
@@ -20,8 +20,8 @@ export default function CategoryPicker({ categories, selectedId, onSelect }: Pro
           key={cat.id}
           style={[
             styles.chip,
-            { borderColor: cat.color },
-            selectedId === cat.id && { backgroundColor: cat.color },
+            { borderColor: cat.colour },
+            selectedId === cat.id && { backgroundColor: cat.colour },
           ]}
           onPress={() => onSelect(cat.id)}
         >

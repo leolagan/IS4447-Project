@@ -1,4 +1,4 @@
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useRouter } from 'expo-router';
@@ -10,8 +10,8 @@ export default function HabitsScreen() {
   const { categories } = useCategories();
   const router = useRouter();
 
-  function getCategoryColor(categoryId: number) {
-    return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
+  function getCategoryColour(categoryId: number) {
+    return categories.find(c => c.id === categoryId)?.colour ?? '#ccc';
   }
 
   function getCategoryName(categoryId: number) {
@@ -41,12 +41,12 @@ export default function HabitsScreen() {
               onLongPress={() => confirmDelete(item.id)}
               activeOpacity={0.75}
             >
-              <View style={[styles.categoryBar, { backgroundColor: getCategoryColor(item.categoryId) }]} />
+              <View style={[styles.categoryBar, { backgroundColor: getCategoryColour(item.categoryId) }]} />
               <View style={styles.cardBody}>
                 <Text style={styles.name}>{item.name}</Text>
                 <View style={styles.tagRow}>
-                  <View style={[styles.tag, { backgroundColor: getCategoryColor(item.categoryId) + '25' }]}>
-                    <Text style={[styles.tagText, { color: getCategoryColor(item.categoryId) }]}>
+                  <View style={[styles.tag, { backgroundColor: getCategoryColour(item.categoryId) + '25' }]}>
+                    <Text style={[styles.tagText, { color: getCategoryColour(item.categoryId) }]}>
                       {getCategoryName(item.categoryId)}
                     </Text>
                   </View>
@@ -73,10 +73,10 @@ export default function HabitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
-  title:        { fontSize: 30, fontWeight: 'bold', color: AppColors.text, marginBottom: 20 },
+  container:    { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  title:        { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
   card: {
-    backgroundColor: AppColors.card,
+    backgroundColor: AppColours.card,
     borderRadius: 14,
     marginBottom: 12,
     flexDirection: 'row',
@@ -90,26 +90,26 @@ const styles = StyleSheet.create({
   },
   categoryBar:    { width: 5, alignSelf: 'stretch' },
   cardBody:       { flex: 1, padding: 16 },
-  name:           { fontSize: 16, fontWeight: '600', color: AppColors.text },
+  name:           { fontSize: 16, fontWeight: '600', color: AppColours.text },
   tagRow:         { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
   tag:            { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
   tagText:        { fontSize: 12, fontWeight: '600' },
-  unit:           { fontSize: 12, color: AppColors.subtext },
-  arrow:          { fontSize: 22, color: AppColors.border, paddingRight: 14 },
+  unit:           { fontSize: 12, color: AppColours.subtext },
+  arrow:          { fontSize: 22, color: AppColours.border, paddingRight: 14 },
   emptyContainer: { alignItems: 'center', marginTop: 80 },
   emptyIcon:      { fontSize: 48, marginBottom: 12 },
-  empty:          { fontSize: 15, color: AppColors.subtext },
+  empty:          { fontSize: 15, color: AppColours.subtext },
   fab: {
     position: 'absolute',
     bottom: 32,
     right: 24,
-    backgroundColor: AppColors.primary,
+    backgroundColor: AppColours.primary,
     width: 58,
     height: 58,
     borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: AppColors.primary,
+    shadowColor: AppColours.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

@@ -52,7 +52,7 @@ export const Fonts = Platform.select({
   },
 });
 
-export const AppColors = {
+export const AppColours = {
   primary:      '#FF6B6B',
   primaryLight: '#FFE3E3',
   edit:         '#4DABF7',

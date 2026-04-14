@@ -1,5 +1,5 @@
 import FormField from '@/components/ui/FormField';
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -76,19 +76,19 @@ export default function EditLogScreen() {
 
       {habit?.metricType === 'boolean' ? (
         <View style={styles.boolRow}>
-          <Text style={styles.label}>Completed?</Text>
+          <Text style={styles.label}>Done?</Text>
           <View style={styles.toggle}>
             <TouchableOpacity
               style={[styles.toggleBtn, boolValue && styles.toggleActive]}
               onPress={() => setBoolValue(true)}
             >
-              <Text style={[styles.toggleText, boolValue && styles.toggleTextActive]}>Yes</Text>
+              <Text style={[styles.toggleText, boolValue && styles.toggleTextActive]}>Done</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.toggleBtn, !boolValue && styles.toggleActive]}
               onPress={() => setBoolValue(false)}
             >
-              <Text style={[styles.toggleText, !boolValue && styles.toggleTextActive]}>No</Text>
+              <Text style={[styles.toggleText, !boolValue && styles.toggleTextActive]}>Not Done</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -143,20 +143,20 @@ export default function EditLogScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
-  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColors.text },
-  habitBadge:       { backgroundColor: AppColors.primaryLight, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, alignSelf: 'flex-start', marginBottom: 20 },
-  habitBadgeText:   { color: AppColors.primary, fontWeight: '600', fontSize: 14 },
-  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColors.text },
+  container:        { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
+  habitBadge:       { backgroundColor: AppColours.primaryLight, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, alignSelf: 'flex-start', marginBottom: 20 },
+  habitBadgeText:   { color: AppColours.primary, fontWeight: '600', fontSize: 14 },
+  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColours.text },
   boolRow:          { marginBottom: 16 },
-  toggle:           { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: AppColors.border, overflow: 'hidden' },
-  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColors.card },
-  toggleActive:     { backgroundColor: AppColors.primary },
-  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColors.text },
+  toggle:           { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: AppColours.border, overflow: 'hidden' },
+  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColours.card },
+  toggleActive:     { backgroundColor: AppColours.primary },
+  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColours.text },
   toggleTextActive: { color: '#fff' },
   timeRow:          { flexDirection: 'row', gap: 12 },
   timeField:        { flex: 1 },
-  saveBtn:          { backgroundColor: AppColors.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
+  saveBtn:          { backgroundColor: AppColours.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
   saveBtnText:      { color: '#fff', fontSize: 16, fontWeight: '600' },
-  cancel:           { textAlign: 'center', color: AppColors.subtext, fontSize: 16, padding: 16 },
+  cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

@@ -1,4 +1,4 @@
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
@@ -34,7 +34,7 @@ export default function HabitDetailScreen() {
   }
 
   function formatValue(value: number) {
-    if (habit?.metricType === 'boolean') return value === 1 ? 'Done ✓' : 'Skipped';
+    if (habit?.metricType === 'boolean') return value === 1 ? 'Done' : 'Not Done';
     if (habit?.unit === 'hrs/mins') return formatMinutes(value);
     return `${value} ${habit?.unit ?? ''}`;
   }
@@ -62,11 +62,11 @@ export default function HabitDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.habitCard, { borderLeftColor: category?.color ?? '#ccc' }]}>
+      <View style={[styles.habitCard, { borderLeftColor: category?.colour ?? '#ccc' }]}>
         <Text style={styles.habitName}>{habit.name}</Text>
         <View style={styles.tagRow}>
-          <View style={[styles.tag, { backgroundColor: (category?.color ?? '#ccc') + '25' }]}>
-            <Text style={[styles.tagText, { color: category?.color ?? '#ccc' }]}>
+          <View style={[styles.tag, { backgroundColor: (category?.colour ?? '#ccc') + '25' }]}>
+            <Text style={[styles.tagText, { color: category?.colour ?? '#ccc' }]}>
               {category?.name}
             </Text>
           </View>
@@ -125,13 +125,13 @@ export default function HabitDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:     { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
+  container:     { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
   header:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  back:          { fontSize: 18, color: AppColors.primary, fontWeight: '500' },
-  editHabitBtn:  { backgroundColor: AppColors.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-  editHabitText: { color: AppColors.edit, fontWeight: '600', fontSize: 14 },
+  back:          { fontSize: 18, color: AppColours.primary, fontWeight: '500' },
+  editHabitBtn:  { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  editHabitText: { color: AppColours.edit, fontWeight: '600', fontSize: 14 },
   habitCard: {
-    backgroundColor: AppColors.card,
+    backgroundColor: AppColours.card,
     borderRadius: 14,
     padding: 16,
     marginBottom: 24,
@@ -142,14 +142,14 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
-  habitName:    { fontSize: 22, fontWeight: 'bold', color: AppColors.text },
+  habitName:    { fontSize: 22, fontWeight: 'bold', color: AppColours.text },
   tagRow:       { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
   tag:          { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
   tagText:      { fontSize: 12, fontWeight: '600' },
-  unit:         { fontSize: 13, color: AppColors.subtext },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: AppColors.text, marginBottom: 12 },
+  unit:         { fontSize: 13, color: AppColours.subtext },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: AppColours.text, marginBottom: 12 },
   logCard: {
-    backgroundColor: AppColors.card,
+    backgroundColor: AppColours.card,
     borderRadius: 14,
     padding: 16,
     marginBottom: 10,
@@ -162,31 +162,31 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
     borderLeftWidth: 4,
-    borderLeftColor: AppColors.border,
+    borderLeftColor: AppColours.border,
   },
   logLeft:       { flex: 1 },
-  logDate:       { fontSize: 12, color: AppColors.subtext, marginBottom: 2 },
-  logValue:      { fontSize: 17, fontWeight: '700', color: AppColors.text },
-  logNotes:      { fontSize: 12, color: AppColors.subtext, marginTop: 4 },
-  logActions:    { flexDirection: 'column', gap: 6, marginLeft: 12 },
-  editBtn:       { backgroundColor: AppColors.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-  editBtnText:   { color: AppColors.edit, fontWeight: '600', fontSize: 13 },
-  deleteBtn:     { backgroundColor: AppColors.dangerLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-  deleteBtnText: { color: AppColors.danger, fontWeight: '600', fontSize: 13 },
+  logDate:       { fontSize: 12, color: AppColours.subtext, marginBottom: 2 },
+  logValue:      { fontSize: 17, fontWeight: '700', color: AppColours.text },
+  logNotes:      { fontSize: 12, color: AppColours.subtext, marginTop: 4 },
+  logActions:    { flexDirection: 'row', gap: 6, marginLeft: 12 },
+  editBtn:       { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+  editBtnText:   { color: AppColours.edit, fontWeight: '600', fontSize: 13 },
+  deleteBtn:     { backgroundColor: AppColours.dangerLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+  deleteBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 13 },
   emptyContainer:{ alignItems: 'center', marginTop: 60 },
   emptyIcon:     { fontSize: 40, marginBottom: 10 },
-  empty:         { fontSize: 15, color: AppColors.subtext },
+  empty:         { fontSize: 15, color: AppColours.subtext },
   fab: {
     position: 'absolute',
     bottom: 32,
     right: 24,
-    backgroundColor: AppColors.primary,
+    backgroundColor: AppColours.primary,
     width: 58,
     height: 58,
     borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: AppColors.primary,
+    shadowColor: AppColours.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

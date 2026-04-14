@@ -13,10 +13,10 @@ export async function seedIfEmpty() {
 
   // Categories
   await db.insert(categories).values([
-    { name: 'Fitness',   color: '#FF6B6B' },
-    { name: 'Nutrition', color: '#51CF66' },
-    { name: 'Wellness',  color: '#845EF7' },
-    { name: 'Recovery',  color: '#339AF0' },
+    { name: 'Fitness',   colour: '#FF6B6B' },
+    { name: 'Nutrition', colour: '#51CF66' },
+    { name: 'Wellness',  colour: '#845EF7' },
+    { name: 'Recovery',  colour: '#339AF0' },
   ]);
 
   const cats = await db.select().from(categories);

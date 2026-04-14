@@ -18,13 +18,13 @@ export function useCategories() {
     }, [])
   );
 
-  async function addCategory(name: string, color: string) {
-    await db.insert(categories).values({ name, color });
+  async function addCategory(name: string, colour: string) {
+    await db.insert(categories).values({ name, colour });
     load();
   }
 
-  async function updateCategory(id: number, name: string, color: string) {
-    await db.update(categories).set({ name, color }).where(eq(categories.id, id));
+  async function updateCategory(id: number, name: string, colour: string) {
+    await db.update(categories).set({ name, colour }).where(eq(categories.id, id));
     load();
   }
 

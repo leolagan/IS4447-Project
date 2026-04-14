@@ -1,4 +1,4 @@
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
@@ -16,9 +16,9 @@ export default function LogsScreen() {
     return habits.find(h => h.id === habitId);
   }
 
-  function getCategoryColor(habitId: number) {
+  function getCategoryColour(habitId: number) {
     const habit = getHabit(habitId);
-    return categories.find(c => c.id === habit?.categoryId)?.color ?? '#ccc';
+    return categories.find(c => c.id === habit?.categoryId)?.colour ?? '#ccc';
   }
 
   function formatMinutes(mins: number) {
@@ -32,7 +32,7 @@ export default function LogsScreen() {
   function formatValue(habitId: number, value: number) {
     const habit = getHabit(habitId);
     if (!habit) return `${value}`;
-    if (habit.metricType === 'boolean') return value === 1 ? 'Done ✓' : 'Skipped';
+    if (habit.metricType === 'boolean') return value === 1 ? 'Done' : 'Not Done';
     if (habit.unit === 'hrs/mins') return formatMinutes(value);
     return `${value} ${habit.unit}`;
   }
@@ -46,7 +46,6 @@ export default function LogsScreen() {
 
   const sorted = [...logs].sort((a, b) => b.date.localeCompare(a.date));
 
-  // Group logs by date
   const grouped: { date: string; data: typeof logs }[] = [];
   sorted.forEach(log => {
     const existing = grouped.find(g => g.date === log.date);
@@ -76,7 +75,7 @@ export default function LogsScreen() {
             <Text style={styles.dateHeader}>{group.date}</Text>
             {group.data.map(log => (
               <View key={log.id} style={styles.logCard}>
-                <View style={[styles.categoryBar, { backgroundColor: getCategoryColor(log.habitId) }]} />
+                <View style={[styles.categoryBar, { backgroundColor: getCategoryColour(log.habitId) }]} />
                 <View style={styles.logBody}>
                   <Text style={styles.habitName}>{getHabit(log.habitId)?.name ?? 'Unknown'}</Text>
                   <Text style={styles.logValue}>{formatValue(log.habitId, log.value)}</Text>
@@ -114,11 +113,11 @@ export default function LogsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
-  title:          { fontSize: 30, fontWeight: 'bold', color: AppColors.text, marginBottom: 20 },
-  dateHeader:     { fontSize: 13, fontWeight: '700', color: AppColors.subtext, marginBottom: 8, marginTop: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  container:      { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  title:          { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
+  dateHeader:     { fontSize: 13, fontWeight: '700', color: AppColours.subtext, marginBottom: 8, marginTop: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   logCard: {
-    backgroundColor: AppColors.card,
+    backgroundColor: AppColours.card,
     borderRadius: 14,
     marginBottom: 10,
     flexDirection: 'row',
@@ -132,28 +131,28 @@ const styles = StyleSheet.create({
   },
   categoryBar:    { width: 5, alignSelf: 'stretch' },
   logBody:        { flex: 1, padding: 14 },
-  habitName:      { fontSize: 14, fontWeight: '700', color: AppColors.text },
-  logValue:       { fontSize: 16, fontWeight: '600', color: AppColors.primary, marginTop: 2 },
-  logNotes:       { fontSize: 12, color: AppColors.subtext, marginTop: 4 },
-  logActions:     { flexDirection: 'column', gap: 6, paddingRight: 12 },
-  editBtn:        { backgroundColor: AppColors.editLight, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
-  editBtnText:    { color: AppColors.edit, fontWeight: '600', fontSize: 12 },
-  deleteBtn:      { backgroundColor: AppColors.dangerLight, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
-  deleteBtnText:  { color: AppColors.danger, fontWeight: '600', fontSize: 12 },
+  habitName:      { fontSize: 14, fontWeight: '700', color: AppColours.text },
+  logValue:       { fontSize: 16, fontWeight: '600', color: AppColours.primary, marginTop: 2 },
+  logNotes:       { fontSize: 12, color: AppColours.subtext, marginTop: 4 },
+  logActions:     { flexDirection: 'row', gap: 6, paddingRight: 12 },
+  editBtn:        { backgroundColor: AppColours.editLight, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  editBtnText:    { color: AppColours.edit, fontWeight: '600', fontSize: 12 },
+  deleteBtn:      { backgroundColor: AppColours.dangerLight, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  deleteBtnText:  { color: AppColours.danger, fontWeight: '600', fontSize: 12 },
   emptyContainer: { alignItems: 'center', marginTop: 80 },
   emptyIcon:      { fontSize: 48, marginBottom: 12 },
-  empty:          { fontSize: 15, color: AppColors.subtext },
+  empty:          { fontSize: 15, color: AppColours.subtext },
   fab: {
     position: 'absolute',
     bottom: 32,
     right: 24,
-    backgroundColor: AppColors.primary,
+    backgroundColor: AppColours.primary,
     width: 58,
     height: 58,
     borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: AppColors.primary,
+    shadowColor: AppColours.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

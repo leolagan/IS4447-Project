@@ -1,13 +1,21 @@
-import CategoryPicker from '@/components/ui/CategoryPicker';
+import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const UNIT_PRESETS = ['km', 'grams', 'steps', 'hrs/mins', 'sessions', 'calories'];
+const UNIT_OPTIONS = [
+  { label: 'km', value: 'km' },
+  { label: 'grams', value: 'grams' },
+  { label: 'minutes', value: 'minutes' },
+  { label: 'hrs/mins', value: 'hrs/mins' },
+  { label: 'session', value: 'session' },
+  { label: 'steps', value: 'steps' },
+  { label: 'calories', value: 'calories' },
+];
 
 export default function NewHabitScreen() {
   const router = useRouter();
@@ -15,9 +23,15 @@ export default function NewHabitScreen() {
   const { categories } = useCategories();
 
   const [name, setName] = useState('');
-  const [unit, setUnit] = useState('');
+  const [unit, setUnit] = useState<string | null>(null);
   const [metricType, setMetricType] = useState<'count' | 'boolean'>('count');
   const [categoryId, setCategoryId] = useState<number | null>(null);
+
+  const categoryOptions = categories.map(c => ({
+    label: c.name,
+    value: String(c.id),
+    colour: c.colour,
+  }));
 
   async function handleSave() {
     if (!name.trim()) {
@@ -28,12 +42,12 @@ export default function NewHabitScreen() {
       Alert.alert('Error', 'Please select a category.');
       return;
     }
-    await addHabit(name.trim(), metricType, unit.trim() || 'times', categoryId);
+    await addHabit(name.trim(), metricType, unit ?? 'times', categoryId);
     router.back();
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       <Text style={styles.title}>New Habit</Text>
 
       <FormField
@@ -58,41 +72,27 @@ export default function NewHabitScreen() {
           onPress={() => setMetricType('boolean')}
         >
           <Text style={[styles.toggleText, metricType === 'boolean' && styles.toggleTextActive]}>
-            Yes / No
+            Done / Not Done
           </Text>
         </TouchableOpacity>
       </View>
 
       {metricType === 'count' && (
-        <>
-          <Text style={styles.label}>Unit</Text>
-          <View style={styles.presetRow}>
-            {UNIT_PRESETS.map(preset => (
-              <TouchableOpacity
-                key={preset}
-                style={[styles.presetChip, unit === preset && styles.presetChipActive]}
-                onPress={() => setUnit(preset)}
-              >
-                <Text style={[styles.presetText, unit === preset && styles.presetTextActive]}>
-                  {preset}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <FormField
-            label="Or type a custom unit"
-            placeholder="e.g. reps, liters"
-            value={unit}
-            onChangeText={setUnit}
-          />
-        </>
+        <DropdownPicker
+          label="Unit"
+          options={UNIT_OPTIONS}
+          selected={unit}
+          placeholder="Select a unit..."
+          onSelect={setUnit}
+        />
       )}
 
-      <Text style={styles.label}>Category</Text>
-      <CategoryPicker
-        categories={categories}
-        selectedId={categoryId}
-        onSelect={setCategoryId}
+      <DropdownPicker
+        label="Category"
+        options={categoryOptions}
+        selected={categoryId !== null ? String(categoryId) : null}
+        placeholder="Select a category..."
+        onSelect={value => setCategoryId(Number(value))}
       />
 
       <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
@@ -102,25 +102,21 @@ export default function NewHabitScreen() {
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.cancel}>Cancel</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
-  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColors.text },
-  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColors.text },
-  toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 8, borderWidth: 1, borderColor: AppColors.border, overflow: 'hidden' },
-  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColors.card },
-  toggleActive:     { backgroundColor: AppColors.primary },
-  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColors.text },
+  scroll:           { flex: 1, backgroundColor: AppColours.background },
+  container:        { padding: 16, paddingTop: 60, paddingBottom: 40 },
+  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
+  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColours.text },
+  toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 8, borderWidth: 1, borderColor: AppColours.border, overflow: 'hidden' },
+  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColours.card },
+  toggleActive:     { backgroundColor: AppColours.primary },
+  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColours.text },
   toggleTextActive: { color: '#fff' },
-  presetRow:        { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  presetChip:       { borderWidth: 1, borderColor: AppColors.border, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: AppColors.card },
-  presetChipActive: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
-  presetText:       { fontSize: 13, color: AppColors.text },
-  presetTextActive: { color: '#fff' },
-  saveBtn:          { backgroundColor: AppColors.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
+  saveBtn:          { backgroundColor: AppColours.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
   saveBtnText:      { color: '#fff', fontSize: 16, fontWeight: '600' },
-  cancel:           { textAlign: 'center', color: AppColors.subtext, fontSize: 16, padding: 16 },
+  cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

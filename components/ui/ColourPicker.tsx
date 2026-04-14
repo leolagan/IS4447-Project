@@ -1,33 +1,33 @@
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const PRESET_COLORS = [
+const PRESET_COLOURS = [
   '#FF6B6B', '#FA5252', '#FF922B', '#FCC419',
   '#51CF66', '#20C997', '#339AF0', '#4DABF7',
   '#748FFC', '#845EF7', '#F06595', '#868E96',
 ];
 
 type Props = {
-  selectedColor: string;
-  onSelect: (color: string) => void;
+  selectedColour: string;
+  onSelect: (colour: string) => void;
 };
 
-export default function ColorPicker({ selectedColor, onSelect }: Props) {
+export default function ColourPicker({ selectedColour, onSelect }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Colour</Text>
       <View style={styles.grid}>
-        {PRESET_COLORS.map(color => {
-          const isSelected = color === selectedColor;
+        {PRESET_COLOURS.map(colour => {
+          const isSelected = colour === selectedColour;
           return (
             <TouchableOpacity
-              key={color}
+              key={colour}
               style={[
                 styles.swatch,
-                { backgroundColor: color },
+                { backgroundColor: colour },
                 isSelected && styles.swatchSelected,
               ]}
-              onPress={() => onSelect(color)}
+              onPress={() => onSelect(colour)}
               activeOpacity={0.8}
             >
               {isSelected && <View style={styles.innerRing} />}
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   swatchSelected: {
     borderWidth: 3,
-    borderColor: AppColors.text,
+    borderColor: AppColours.text,
   },
   innerRing: {
     width: 14,

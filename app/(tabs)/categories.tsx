@@ -1,8 +1,7 @@
-import { AppColors } from '@/constants/theme';
+import { AppColours } from '@/constants/theme';
 import { db } from '@/db/client';
 import { habits } from '@/db/schema';
 import { useCategories } from '@/hooks/useCategories';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -58,7 +57,7 @@ export default function CategoriesScreen() {
                 onLongPress={() => confirmDelete(item.id, item.name)}
                 activeOpacity={0.75}
               >
-                <View style={[styles.swatch, { backgroundColor: item.color }]} />
+                <View style={[styles.swatch, { backgroundColor: item.colour }]} />
                 <View style={styles.cardBody}>
                   <Text style={styles.name}>{item.name}</Text>
                   <Text style={styles.count}>
@@ -70,7 +69,7 @@ export default function CategoriesScreen() {
                   onPress={() => router.push(`/category/edit/${item.id}`)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="pencil-outline" size={18} color={AppColors.edit} />
+                  <Text style={styles.editBtnText}>Edit</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             </Animated.View>
@@ -78,7 +77,6 @@ export default function CategoriesScreen() {
         }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🎨</Text>
             <Text style={styles.empty}>No categories yet. Tap + to add one.</Text>
           </View>
         }
@@ -96,10 +94,10 @@ export default function CategoriesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: AppColors.background, padding: 16, paddingTop: 60 },
-  title:          { fontSize: 30, fontWeight: 'bold', color: AppColors.text, marginBottom: 20 },
+  container:      { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  title:          { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
   card: {
-    backgroundColor: AppColors.card,
+    backgroundColor: AppColours.card,
     borderRadius: 14,
     marginBottom: 12,
     flexDirection: 'row',
@@ -114,23 +112,23 @@ const styles = StyleSheet.create({
   },
   swatch:         { width: 28, height: 28, borderRadius: 14 },
   cardBody:       { flex: 1 },
-  name:           { fontSize: 16, fontWeight: '600', color: AppColors.text },
-  count:          { fontSize: 13, color: AppColors.subtext, marginTop: 2 },
-  editBtn:        { padding: 4 },
+  name:           { fontSize: 16, fontWeight: '600', color: AppColours.text },
+  count:          { fontSize: 13, color: AppColours.subtext, marginTop: 2 },
+  editBtn:        { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+  editBtnText:    { color: AppColours.edit, fontWeight: '600', fontSize: 13 },
   emptyContainer: { alignItems: 'center', marginTop: 80 },
-  emptyIcon:      { fontSize: 48, marginBottom: 12 },
-  empty:          { fontSize: 15, color: AppColors.subtext },
+  empty:          { fontSize: 15, color: AppColours.subtext },
   fab: {
     position: 'absolute',
     bottom: 32,
     right: 24,
-    backgroundColor: AppColors.primary,
+    backgroundColor: AppColours.primary,
     width: 58,
     height: 58,
     borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: AppColors.primary,
+    shadowColor: AppColours.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
