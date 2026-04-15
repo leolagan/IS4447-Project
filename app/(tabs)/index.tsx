@@ -1,14 +1,21 @@
+import DropdownPicker from '@/components/ui/DropdownPicker';
+import FormField from '@/components/ui/FormField';
 import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function HabitsScreen() {
   const { habits, deleteHabit } = useHabits();
-  const { categories } = useCategories();
+  const { categories }          = useCategories();
   const router = useRouter();
+
+  const [searchText, setSearchText]          = useState('');
+  const [selectedCategoryId, setSelectedCat] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen]        = useState(false);
 
   function getCategoryColour(categoryId: number) {
     return categories.find(c => c.id === categoryId)?.colour ?? '#ccc';
@@ -25,12 +32,73 @@ export default function HabitsScreen() {
     ]);
   }
 
+  // Apply filters in-memory
+  const search = searchText.trim().toLowerCase();
+  const filteredHabits = habits.filter(h => {
+    const matchesCat  = !selectedCategoryId || h.categoryId === parseInt(selectedCategoryId);
+    const matchesText = !search || h.name.toLowerCase().includes(search);
+    return matchesCat && matchesText;
+  });
+
+  const activeFilterCount = (search ? 1 : 0) + (selectedCategoryId ? 1 : 0);
+  const filtersActive = activeFilterCount > 0;
+
+  const categoryOptions = [
+    { label: 'All Categories', value: '' },
+    ...categories.map(c => ({ label: c.name, value: String(c.id), colour: c.colour })),
+  ];
+
+  function clearFilters() {
+    setSearchText('');
+    setSelectedCat(null);
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Habits</Text>
 
+      {/* Filter toggle button */}
+      <TouchableOpacity
+        style={styles.filterToggle}
+        onPress={() => setFiltersOpen(v => !v)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.filterToggleText}>
+          {filtersOpen ? '▲ Filters' : '▼ Filters'}
+        </Text>
+        {activeFilterCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{activeFilterCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      {/* Collapsible filter panel */}
+      {filtersOpen && (
+        <View style={styles.filterPanel}>
+          <FormField
+            label="Search"
+            placeholder="Search habits…"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          <DropdownPicker
+            label="Category"
+            options={categoryOptions}
+            selected={selectedCategoryId ?? ''}
+            placeholder="All Categories"
+            onSelect={v => setSelectedCat(v === '' ? null : v)}
+          />
+          {filtersActive && (
+            <TouchableOpacity style={styles.clearBtn} onPress={clearFilters} activeOpacity={0.75}>
+              <Text style={styles.clearBtnText}>Clear Filters</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       <FlatList
-        data={habits}
+        data={filteredHabits}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item, index }) => (
@@ -59,8 +127,15 @@ export default function HabitsScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🎯</Text>
-            <Text style={styles.empty}>No habits yet. Tap + to add one.</Text>
+            <Text style={styles.emptyIcon}>{filtersActive ? '🔍' : '🎯'}</Text>
+            <Text style={styles.empty}>
+              {filtersActive ? 'No habits match your filters.' : 'No habits yet. Tap + to add one.'}
+            </Text>
+            {filtersActive && (
+              <TouchableOpacity onPress={clearFilters} style={styles.clearBtnInline}>
+                <Text style={styles.clearBtnText}>Clear Filters</Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />
@@ -73,8 +148,63 @@ export default function HabitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  title:        { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
+  container: { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  title:     { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 12 },
+
+  // Filter toggle
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: AppColours.card,
+    borderWidth: 1,
+    borderColor: AppColours.border,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    marginBottom: 12,
+    gap: 8,
+  },
+  filterToggleText: { fontSize: 14, fontWeight: '600', color: AppColours.text },
+  badge: {
+    backgroundColor: AppColours.primary,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+
+  // Filter panel
+  filterPanel: {
+    backgroundColor: AppColours.card,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  clearBtn: {
+    backgroundColor: AppColours.dangerLight,
+    borderRadius: 8,
+    paddingVertical: 9,
+    alignItems: 'center',
+  },
+  clearBtnInline: {
+    marginTop: 12,
+    backgroundColor: AppColours.dangerLight,
+    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 20,
+  },
+  clearBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 14 },
+
+  // Habit list (unchanged)
   card: {
     backgroundColor: AppColours.card,
     borderRadius: 14,
