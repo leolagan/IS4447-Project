@@ -12,7 +12,6 @@ const UNIT_OPTIONS = [
   { label: 'grams', value: 'grams' },
   { label: 'minutes', value: 'minutes' },
   { label: 'hrs/mins', value: 'hrs/mins' },
-  { label: 'session', value: 'session' },
   { label: 'steps', value: 'steps' },
   { label: 'calories', value: 'calories' },
 ];
@@ -58,7 +57,11 @@ export default function EditHabitScreen() {
   }
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.title}>Edit Habit</Text>
 
       <FormField

@@ -5,7 +5,12 @@ import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+
+function getValuePlaceholder(unit: string): string {
+  if (unit === 'hrs/mins') return '';
+  return `e.g. 5 ${unit}`;
+}
 
 export default function NewLogScreen() {
   const router = useRouter();
@@ -56,89 +61,94 @@ export default function NewLogScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>New Log</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>New Log</Text>
 
-      <DropdownPicker
-        label="Habit"
-        options={habitOptions}
-        selected={selectedHabitId !== null ? String(selectedHabitId) : null}
-        placeholder="Select a habit..."
-        onSelect={value => setSelectedHabitId(Number(value))}
-      />
-
-      <FormField
-        label="Date"
-        placeholder="YYYY-MM-DD"
-        value={date}
-        onChangeText={setDate}
-      />
-
-      {habit?.metricType === 'boolean' ? (
-        <View style={styles.boolRow}>
-          <Text style={styles.label}>Done?</Text>
-          <View style={styles.toggle}>
-            <TouchableOpacity
-              style={[styles.toggleBtn, boolValue && styles.toggleActive]}
-              onPress={() => setBoolValue(true)}
-            >
-              <Text style={[styles.toggleText, boolValue && styles.toggleTextActive]}>Done</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.toggleBtn, !boolValue && styles.toggleActive]}
-              onPress={() => setBoolValue(false)}
-            >
-              <Text style={[styles.toggleText, !boolValue && styles.toggleTextActive]}>Not Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : habit?.unit === 'hrs/mins' ? (
-        <View style={styles.timeRow}>
-          <View style={styles.timeField}>
-            <FormField
-              label="Hours"
-              placeholder="0"
-              value={hours}
-              onChangeText={setHours}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.timeField}>
-            <FormField
-              label="Minutes"
-              placeholder="0"
-              value={mins}
-              onChangeText={setMins}
-              keyboardType="numeric"
-            />
-          </View>
-        </View>
-      ) : (
-        <FormField
-          label={`Value ${habit ? `(${habit.unit})` : ''}`}
-          placeholder="e.g. 5"
-          value={value}
-          onChangeText={setValue}
-          keyboardType="numeric"
+        <DropdownPicker
+          label="Habit"
+          options={habitOptions}
+          selected={selectedHabitId !== null ? String(selectedHabitId) : null}
+          placeholder="Select a habit..."
+          onSelect={value => setSelectedHabitId(Number(value))}
         />
-      )}
 
-      <FormField
-        label="Notes (optional)"
-        placeholder="Any notes..."
-        value={notes}
-        onChangeText={setNotes}
-        multiline
-      />
+        <FormField
+          label="Date"
+          placeholder="YYYY-MM-DD"
+          value={date}
+          onChangeText={setDate}
+        />
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Log</Text>
-      </TouchableOpacity>
+        {habit?.metricType === 'boolean' ? (
+          <View style={styles.boolRow}>
+            <Text style={styles.label}>Done?</Text>
+            <View style={styles.toggle}>
+              <TouchableOpacity
+                style={[styles.toggleBtn, boolValue && styles.toggleActive]}
+                onPress={() => setBoolValue(true)}
+              >
+                <Text style={[styles.toggleText, boolValue && styles.toggleTextActive]}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleBtn, !boolValue && styles.toggleActive]}
+                onPress={() => setBoolValue(false)}
+              >
+                <Text style={[styles.toggleText, !boolValue && styles.toggleTextActive]}>Not Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : habit?.unit === 'hrs/mins' ? (
+          <View style={styles.timeRow}>
+            <View style={styles.timeField}>
+              <FormField
+                label="Hours"
+                placeholder="Hours"
+                value={hours}
+                onChangeText={setHours}
+                keyboardType="numeric"
+                editable={!!habit}
+              />
+            </View>
+            <View style={styles.timeField}>
+              <FormField
+                label="Minutes"
+                placeholder="Minutes"
+                value={mins}
+                onChangeText={setMins}
+                keyboardType="numeric"
+                editable={!!habit}
+              />
+            </View>
+          </View>
+        ) : (
+          <FormField
+            label="Value"
+            placeholder={habit ? getValuePlaceholder(habit.unit) : 'Select a habit first'}
+            value={value}
+            onChangeText={setValue}
+            keyboardType="numeric"
+            editable={!!habit}
+          />
+        )}
 
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.cancel}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
+        <FormField
+          label="Notes (optional)"
+          placeholder="Any notes..."
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+        />
+
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+          <Text style={styles.saveBtnText}>Save Log</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.cancel}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

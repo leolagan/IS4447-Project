@@ -7,20 +7,30 @@ type Props = {
   onChangeText: (text: string) => void;
   multiline?: boolean;
   keyboardType?: 'default' | 'numeric';
+  editable?: boolean;
 };
 
-export default function FormField({ label, placeholder, value, onChangeText, multiline, keyboardType }: Props) {
+export default function FormField({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  multiline,
+  keyboardType,
+  editable = true,
+}: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        style={[styles.input, multiline && styles.multiline]}
+        style={[styles.input, multiline && styles.multiline, !editable && styles.disabled]}
         placeholder={placeholder}
         placeholderTextColor="#aaa"
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}
         keyboardType={keyboardType ?? 'default'}
+        editable={editable}
       />
     </View>
   );
@@ -47,5 +57,10 @@ const styles = StyleSheet.create({
   multiline: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  disabled: {
+    backgroundColor: '#F8F9FA',
+    borderColor: '#DEE2E6',
+    color: '#868E96',
   },
 });

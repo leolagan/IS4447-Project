@@ -28,7 +28,7 @@ export async function seedIfEmpty() {
   // Habits
   await db.insert(habits).values([
     { name: 'Run',          metricType: 'count',   unit: 'km',       categoryId: fitness.id },
-    { name: 'Gym Session',  metricType: 'boolean', unit: 'session',  categoryId: fitness.id },
+    { name: 'Gym Session',  metricType: 'boolean', unit: 'boolean',  categoryId: fitness.id },
     { name: 'Protein Goal', metricType: 'count',   unit: 'grams',    categoryId: nutrition.id },
     { name: 'Screen Time',  metricType: 'count',   unit: 'hrs/mins', categoryId: wellness.id },
     { name: 'Sleep',        metricType: 'count',   unit: 'hrs/mins', categoryId: recovery.id },
@@ -95,11 +95,11 @@ export async function seedIfEmpty() {
 
   // Targets
   await db.insert(targets).values([
-    { habitId: run.id,        type: 'weekly', goal: 20,  direction: 'min' },
-    { habitId: gym.id,        type: 'weekly', goal: 3,   direction: 'min' },
-    { habitId: protein.id,    type: 'weekly', goal: 150, direction: 'min' },
-    { habitId: screenTime.id, type: 'daily',  goal: 120, direction: 'max' },
-    { habitId: sleep.id,      type: 'daily',  goal: 420, direction: 'min' },
-    { habitId: stretching.id, type: 'weekly', goal: 60,  direction: 'min' },
+    { habitId: run.id,        type: 'weekly',  goal: 20,   direction: 'min' },
+    { habitId: gym.id,        type: 'weekly',  goal: 3,    direction: 'min' },
+    { habitId: protein.id,    type: 'weekly',  goal: 150,  direction: 'min' },
+    { habitId: screenTime.id, type: 'monthly', goal: 3000, direction: 'max' },
+    { habitId: sleep.id,      type: 'monthly', goal: 12600, direction: 'min' },
+    { habitId: stretching.id, type: 'weekly',  goal: 60,   direction: 'min' },
   ]);
 }

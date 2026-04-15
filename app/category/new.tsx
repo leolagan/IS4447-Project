@@ -4,7 +4,7 @@ import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 const DEFAULT_COLOUR = '#FF6B6B';
 
@@ -25,31 +25,33 @@ export default function NewCategoryScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>New Category</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>New Category</Text>
 
-      <FormField
-        label="Category Name"
-        placeholder="e.g. Fitness"
-        value={name}
-        onChangeText={setName}
-      />
+        <FormField
+          label="Category Name"
+          placeholder="e.g. Fitness"
+          value={name}
+          onChangeText={setName}
+        />
 
-      <ColourPicker selectedColour={colour} onSelect={setColour} />
+        <ColourPicker selectedColour={colour} onSelect={setColour} />
 
-      <View style={styles.preview}>
-        <View style={[styles.previewSwatch, { backgroundColor: colour }]} />
-        <Text style={styles.previewName}>{name || 'Preview'}</Text>
+        <View style={styles.preview}>
+          <View style={[styles.previewSwatch, { backgroundColor: colour }]} />
+          <Text style={styles.previewName}>{name || 'Preview'}</Text>
+        </View>
+
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+          <Text style={styles.saveBtnText}>Save Category</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.cancel}>Cancel</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Category</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.cancel}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
