@@ -1,16 +1,17 @@
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
+import HabitCard from '@/components/habits/HabitCard';
 import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function HabitsScreen() {
-  const { habits, deleteHabit } = useHabits();
-  const { categories }          = useCategories();
+  const { habits, deleteHabit, isLoading, error } = useHabits();
+  const { categories }                            = useCategories();
   const router = useRouter();
 
   const [searchText, setSearchText]          = useState('');
@@ -18,7 +19,7 @@ export default function HabitsScreen() {
   const [filtersOpen, setFiltersOpen]        = useState(false);
 
   function getCategoryColour(categoryId: number) {
-    return categories.find(c => c.id === categoryId)?.colour ?? '#ccc';
+    return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
   }
 
   function getCategoryName(categoryId: number) {
@@ -45,7 +46,7 @@ export default function HabitsScreen() {
 
   const categoryOptions = [
     { label: 'All Categories', value: '' },
-    ...categories.map(c => ({ label: c.name, value: String(c.id), colour: c.colour })),
+    ...categories.map(c => ({ label: c.name, value: String(c.id), colour: c.color })),
   ];
 
   function clearFilters() {
@@ -53,8 +54,26 @@ export default function HabitsScreen() {
     setSelectedCat(null);
   }
 
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={AppColours.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      <Image source={require('@/assets/images/icon.png')} style={styles.logo} />
+      <Text style={styles.brand}>HabitFlow</Text>
       <Text style={styles.title}>My Habits</Text>
 
       {/* Filter toggle button */}
@@ -62,6 +81,8 @@ export default function HabitsScreen() {
         style={styles.filterToggle}
         onPress={() => setFiltersOpen(v => !v)}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={filtersOpen ? 'Hide filters' : 'Show filters'}
       >
         <Text style={styles.filterToggleText}>
           {filtersOpen ? '▲ Filters' : '▼ Filters'}
@@ -90,7 +111,13 @@ export default function HabitsScreen() {
             onSelect={v => setSelectedCat(v === '' ? null : v)}
           />
           {filtersActive && (
-            <TouchableOpacity style={styles.clearBtn} onPress={clearFilters} activeOpacity={0.75}>
+            <TouchableOpacity
+              style={styles.clearBtn}
+              onPress={clearFilters}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel="Clear all filters"
+            >
               <Text style={styles.clearBtnText}>Clear Filters</Text>
             </TouchableOpacity>
           )}
@@ -103,26 +130,15 @@ export default function HabitsScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item, index }) => (
           <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
-            <TouchableOpacity
-              style={styles.card}
+            <HabitCard
+              name={item.name}
+              unit={item.unit}
+              metricType={item.metricType}
+              categoryColor={getCategoryColour(item.categoryId)}
+              categoryName={getCategoryName(item.categoryId)}
               onPress={() => router.push(`/habit/${item.id}`)}
               onLongPress={() => confirmDelete(item.id)}
-              activeOpacity={0.75}
-            >
-              <View style={[styles.categoryBar, { backgroundColor: getCategoryColour(item.categoryId) }]} />
-              <View style={styles.cardBody}>
-                <Text style={styles.name}>{item.name}</Text>
-                <View style={styles.tagRow}>
-                  <View style={[styles.tag, { backgroundColor: getCategoryColour(item.categoryId) + '25' }]}>
-                    <Text style={[styles.tagText, { color: getCategoryColour(item.categoryId) }]}>
-                      {getCategoryName(item.categoryId)}
-                    </Text>
-                  </View>
-                  <Text style={styles.unit}>{item.unit}</Text>
-                </View>
-              </View>
-              <Text style={styles.arrow}>›</Text>
-            </TouchableOpacity>
+            />
           </Animated.View>
         )}
         ListEmptyComponent={
@@ -132,7 +148,12 @@ export default function HabitsScreen() {
               {filtersActive ? 'No habits match your filters.' : 'No habits yet. Tap + to add one.'}
             </Text>
             {filtersActive && (
-              <TouchableOpacity onPress={clearFilters} style={styles.clearBtnInline}>
+              <TouchableOpacity
+                onPress={clearFilters}
+                style={styles.clearBtnInline}
+                accessibilityRole="button"
+                accessibilityLabel="Clear all filters"
+              >
                 <Text style={styles.clearBtnText}>Clear Filters</Text>
               </TouchableOpacity>
             )}
@@ -140,7 +161,13 @@ export default function HabitsScreen() {
         }
       />
 
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/habit/new')} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => router.push('/habit/new')}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add new habit"
+      >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
@@ -149,6 +176,10 @@ export default function HabitsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
+  errorText: { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
+  logo:      { width: 48, height: 48, alignSelf: 'center', marginBottom: 8 },
+  brand:     { fontSize: 13, fontWeight: '700', color: AppColours.primary, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 2 },
   title:     { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 12 },
 
   // Filter toggle
@@ -161,7 +192,7 @@ const styles = StyleSheet.create({
     borderColor: AppColours.border,
     borderRadius: 8,
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 10,
     marginBottom: 12,
     gap: 8,
   },
@@ -204,28 +235,6 @@ const styles = StyleSheet.create({
   },
   clearBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 14 },
 
-  // Habit list (unchanged)
-  card: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  categoryBar:    { width: 5, alignSelf: 'stretch' },
-  cardBody:       { flex: 1, padding: 16 },
-  name:           { fontSize: 16, fontWeight: '600', color: AppColours.text },
-  tagRow:         { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
-  tag:            { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
-  tagText:        { fontSize: 12, fontWeight: '600' },
-  unit:           { fontSize: 12, color: AppColours.subtext },
-  arrow:          { fontSize: 22, color: AppColours.border, paddingRight: 14 },
   emptyContainer: { alignItems: 'center', marginTop: 80 },
   emptyIcon:      { fontSize: 48, marginBottom: 12 },
   empty:          { fontSize: 15, color: AppColours.subtext },

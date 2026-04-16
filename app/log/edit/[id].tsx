@@ -1,7 +1,9 @@
 import FormField from '@/components/ui/FormField';
+import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
+import { formatDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -26,7 +28,7 @@ export default function EditLogScreen() {
   useEffect(() => {
     const log = logs.find(l => l.id === Number(id));
     if (log) {
-      setDate(log.date);
+      setDate(formatDisplayDate(log.date));
       setValue(log.value.toString());
       setBoolValue(log.value === 1);
       setNotes(log.notes ?? '');
@@ -53,7 +55,7 @@ export default function EditLogScreen() {
       return;
     }
 
-    await updateLog(Number(id), date, finalValue, notes);
+    await updateLog(Number(id), parseDisplayDate(date), finalValue, notes);
     router.back();
   }
 
@@ -70,7 +72,7 @@ export default function EditLogScreen() {
 
         <FormField
           label="Date"
-          placeholder="YYYY-MM-DD"
+          placeholder="DD/MM/YYYY"
           value={date}
           onChangeText={setDate}
         />
@@ -132,9 +134,7 @@ export default function EditLogScreen() {
           multiline
         />
 
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Text style={styles.saveBtnText}>Save Changes</Text>
-        </TouchableOpacity>
+        <PrimaryButton title="Save Changes" onPress={handleSave} />
 
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.cancel}>Cancel</Text>
@@ -158,7 +158,5 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: '#fff' },
   timeRow:          { flexDirection: 'row', gap: 12 },
   timeField:        { flex: 1 },
-  saveBtn:          { backgroundColor: AppColours.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
-  saveBtnText:      { color: '#fff', fontSize: 16, fontWeight: '600' },
   cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

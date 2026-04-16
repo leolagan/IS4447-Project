@@ -6,10 +6,20 @@ import { useCallback, useState } from 'react';
 
 export function useHabits() {
   const [data, setData] = useState<typeof habits.$inferSelect[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const result = await db.select().from(habits);
-    setData(result);
+    setIsLoading(true);
+    try {
+      const result = await db.select().from(habits);
+      setData(result);
+      setError(null);
+    } catch {
+      setError('Failed to load habits.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useFocusEffect(
@@ -33,5 +43,5 @@ export function useHabits() {
     load();
   }
 
-  return { habits: data, addHabit, updateHabit, deleteHabit, reload: load };
+  return { habits: data, addHabit, updateHabit, deleteHabit, reload: load, isLoading, error };
 }

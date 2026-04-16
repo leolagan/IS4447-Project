@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "IS4447-Project",
+    "name": "HabitFlow",
     "slug": "IS4447-Project",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -33,9 +33,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#1C8DB3",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#1C8DB3"
           }
         }
       ]

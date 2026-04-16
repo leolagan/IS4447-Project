@@ -1,5 +1,6 @@
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
+import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useHabits } from '@/hooks/useHabits';
 import { useTargets } from '@/hooks/useTargets';
@@ -168,9 +169,7 @@ export default function NewTargetScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Target</Text>
-      </TouchableOpacity>
+      <PrimaryButton title="Save Target" onPress={handleSave} />
 
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.cancel}>Cancel</Text>
@@ -191,7 +190,5 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: '#fff' },
   timeRow:          { flexDirection: 'row', gap: 12, marginBottom: 16 },
   timeField:        { flex: 1 },
-  saveBtn:          { backgroundColor: AppColours.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
-  saveBtnText:      { color: '#fff', fontSize: 16, fontWeight: '600' },
   cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

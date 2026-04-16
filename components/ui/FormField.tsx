@@ -31,6 +31,7 @@ export default function FormField({
         multiline={multiline}
         keyboardType={keyboardType ?? 'default'}
         editable={editable}
+        accessibilityLabel={label}
       />
     </View>
   );

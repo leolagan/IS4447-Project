@@ -5,7 +5,7 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
+const tintColorLight = '#1C8DB3';
 const tintColorDark = '#fff';
 
 export const Colors = {
@@ -53,10 +53,10 @@ export const Fonts = Platform.select({
 });
 
 export const AppColours = {
-  primary:      '#FF6B6B',
-  primaryLight: '#FFE3E3',
-  edit:         '#4DABF7',
-  editLight:    '#E7F5FF',
+  primary:      '#1C8DB3',
+  primaryLight: '#D0EDF7',
+  edit:         '#2AA7C9',
+  editLight:    '#E0F4FA',
   danger:       '#FA5252',
   dangerLight:  '#FFF0F0',
   background:   '#F8F9FA',

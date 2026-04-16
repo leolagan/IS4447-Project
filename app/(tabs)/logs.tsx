@@ -4,9 +4,11 @@ import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
+import { formatDisplayDate } from '@/utils/dateHelpers';
+import { formatValue as sharedFormatValue } from '@/utils/formatters';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 type DateRange = 'all' | 'today' | 'week' | 'month';
@@ -33,9 +35,9 @@ const DATE_CHIPS: { label: string; value: DateRange }[] = [
 
 export default function LogsScreen() {
   const router = useRouter();
-  const { logs, deleteLog }  = useLogs();
-  const { habits }           = useHabits();
-  const { categories }       = useCategories();
+  const { logs, deleteLog, isLoading, error } = useLogs();
+  const { habits }                            = useHabits();
+  const { categories }                        = useCategories();
 
   const [searchText, setSearchText]          = useState('');
   const [selectedCategoryId, setSelectedCat] = useState<string | null>(null);
@@ -48,23 +50,14 @@ export default function LogsScreen() {
 
   function getCategoryColour(habitId: number) {
     const habit = getHabit(habitId);
-    return categories.find(c => c.id === habit?.categoryId)?.colour ?? '#ccc';
-  }
-
-  function formatMinutes(mins: number) {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
+    return categories.find(c => c.id === habit?.categoryId)?.color ?? '#ccc';
   }
 
   function formatValue(habitId: number, value: number) {
     const habit = getHabit(habitId);
     if (!habit) return `${value}`;
     if (habit.metricType === 'boolean') return value === 1 ? 'Done' : 'Not Done';
-    if (habit.unit === 'hrs/mins') return formatMinutes(value);
-    return `${value} ${habit.unit}`;
+    return sharedFormatValue(value, habit.unit, habit.metricType);
   }
 
   function confirmDelete(id: number) {
@@ -113,13 +106,29 @@ export default function LogsScreen() {
 
   const categoryOptions = [
     { label: 'All Categories', value: '' },
-    ...categories.map(c => ({ label: c.name, value: String(c.id), colour: c.colour })),
+    ...categories.map(c => ({ label: c.name, value: String(c.id), colour: c.color })),
   ];
 
   function clearFilters() {
     setSearchText('');
     setSelectedCat(null);
     setDateRange('all');
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={AppColours.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
   }
 
   return (
@@ -131,6 +140,8 @@ export default function LogsScreen() {
         style={styles.filterToggle}
         onPress={() => setFiltersOpen(v => !v)}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={filtersOpen ? 'Hide filters' : 'Show filters'}
       >
         <Text style={styles.filterToggleText}>
           {filtersOpen ? '▲ Filters' : '▼ Filters'}
@@ -171,6 +182,8 @@ export default function LogsScreen() {
                 style={[styles.chip, dateRange === chip.value && styles.chipActive]}
                 onPress={() => setDateRange(chip.value)}
                 activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel={chip.label}
               >
                 <Text style={[styles.chipText, dateRange === chip.value && styles.chipTextActive]}>
                   {chip.label}
@@ -179,7 +192,13 @@ export default function LogsScreen() {
             ))}
           </ScrollView>
           {filtersActive && (
-            <TouchableOpacity style={styles.clearBtn} onPress={clearFilters} activeOpacity={0.75}>
+            <TouchableOpacity
+              style={styles.clearBtn}
+              onPress={clearFilters}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel="Clear all filters"
+            >
               <Text style={styles.clearBtnText}>Clear Filters</Text>
             </TouchableOpacity>
           )}
@@ -197,7 +216,12 @@ export default function LogsScreen() {
               {filtersActive ? 'No logs match your filters.' : 'No logs yet. Tap + to add one.'}
             </Text>
             {filtersActive && (
-              <TouchableOpacity onPress={clearFilters} style={styles.clearBtnInline}>
+              <TouchableOpacity
+                onPress={clearFilters}
+                style={styles.clearBtnInline}
+                accessibilityRole="button"
+                accessibilityLabel="Clear all filters"
+              >
                 <Text style={styles.clearBtnText}>Clear Filters</Text>
               </TouchableOpacity>
             )}
@@ -205,7 +229,7 @@ export default function LogsScreen() {
         }
         renderItem={({ item: group, index: groupIndex }) => (
           <Animated.View entering={FadeInDown.delay(groupIndex * 60).springify()}>
-            <Text style={styles.dateHeader}>{group.date}</Text>
+            <Text style={styles.dateHeader}>{formatDisplayDate(group.date)}</Text>
             {group.data.map(log => (
               <View key={log.id} style={styles.logCard}>
                 <View style={[styles.categoryBar, { backgroundColor: getCategoryColour(log.habitId) }]} />
@@ -218,12 +242,18 @@ export default function LogsScreen() {
                   <TouchableOpacity
                     style={styles.editBtn}
                     onPress={() => router.push(`/log/edit/${log.id}`)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit log"
+                    hitSlop={{ top: 8, bottom: 8 }}
                   >
                     <Text style={styles.editBtnText}>Edit</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.deleteBtn}
                     onPress={() => confirmDelete(log.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Delete log"
+                    hitSlop={{ top: 8, bottom: 8 }}
                   >
                     <Text style={styles.deleteBtnText}>Delete</Text>
                   </TouchableOpacity>
@@ -238,6 +268,8 @@ export default function LogsScreen() {
         style={styles.fab}
         onPress={() => router.push('/log/new')}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add new log"
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -247,6 +279,8 @@ export default function LogsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
+  errorText: { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
   title:     { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 12 },
 
   // Filter toggle
@@ -259,7 +293,7 @@ const styles = StyleSheet.create({
     borderColor: AppColours.border,
     borderRadius: 8,
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 10,
     marginBottom: 12,
     gap: 8,
   },
@@ -291,7 +325,7 @@ const styles = StyleSheet.create({
   chipRow:   { marginBottom: 12 },
   chip: {
     paddingHorizontal: 16,
-    paddingVertical: 7,
+    paddingVertical: 11,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: AppColours.border,
@@ -335,13 +369,13 @@ const styles = StyleSheet.create({
   },
   categoryBar:   { width: 5, alignSelf: 'stretch' },
   logBody:       { flex: 1, padding: 14 },
-  habitName:     { fontSize: 14, fontWeight: '700', color: AppColours.text },
-  logValue:      { fontSize: 16, fontWeight: '600', color: AppColours.primary, marginTop: 2 },
+  habitName:     { fontSize: 16, fontWeight: '700', color: AppColours.text },
+  logValue:      { fontSize: 14, fontWeight: '400', color: AppColours.subtext, marginTop: 2 },
   logNotes:      { fontSize: 12, color: AppColours.subtext, marginTop: 4 },
   logActions:    { flexDirection: 'row', gap: 6, paddingRight: 12 },
-  editBtn:       { backgroundColor: AppColours.editLight, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  editBtn:       { backgroundColor: AppColours.editLight, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8 },
   editBtnText:   { color: AppColours.edit, fontWeight: '600', fontSize: 12 },
-  deleteBtn:     { backgroundColor: AppColours.dangerLight, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  deleteBtn:     { backgroundColor: AppColours.dangerLight, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8 },
   deleteBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 12 },
   emptyContainer: { alignItems: 'center', marginTop: 80 },
   emptyIcon:      { fontSize: 48, marginBottom: 12 },

@@ -5,8 +5,9 @@ import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { useTargets } from '@/hooks/useTargets';
+import { formatMinutes, formatValue } from '@/utils/formatters';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -16,19 +17,6 @@ type Log = typeof habitLogs.$inferSelect;
 type Habit = typeof habits.$inferSelect;
 
 // ─── Formatters ──────────────────────────────────────────────────────────────
-
-function formatMinutes(mins: number): string {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `${h}h ${m}m`;
-}
-
-function formatValue(value: number, unit: string, metricType: string): string {
-  if (value === 0) return '0';
-  if (unit === 'hrs/mins') return formatMinutes(Math.round(value));
-  if (metricType === 'boolean') return `${value}×`;
-  return `${value} ${unit}`;
-}
 
 function formatYLabel(value: number, unit: string, metricType: string): string {
   if (value === 0) return '0';
@@ -202,10 +190,10 @@ function StatCard({ label, value }: { label: string; value: string }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function InsightsScreen() {
-  const { logs }       = useLogs();
-  const { habits }     = useHabits();
-  const { categories } = useCategories();
-  const { targets }    = useTargets();
+  const { logs, isLoading, error } = useLogs();
+  const { habits }                 = useHabits();
+  const { categories }             = useCategories();
+  const { targets }                = useTargets();
 
   const [period, setPeriod]                   = useState<Period>('daily');
   const [selectedHabitId, setSelectedHabitId] = useState<number | null>(null);
@@ -222,7 +210,7 @@ export default function InsightsScreen() {
   );
 
   function getCategoryColour(categoryId: number): string {
-    return categories.find(c => c.id === categoryId)?.colour ?? AppColours.primary;
+    return categories.find(c => c.id === categoryId)?.color ?? AppColours.primary;
   }
 
   // Build options for the dropdown — include category colour dot
@@ -284,6 +272,22 @@ export default function InsightsScreen() {
 
   const hasData = chartBars.some(b => b.value > 0);
 
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={AppColours.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Insights</Text>
@@ -296,6 +300,8 @@ export default function InsightsScreen() {
             style={[styles.toggleBtn, period === p && styles.toggleBtnActive]}
             onPress={() => setPeriod(p)}
             activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel={p + ' view'}
           >
             <Text style={[styles.toggleText, period === p && styles.toggleTextActive]}>
               {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -376,6 +382,8 @@ export default function InsightsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: AppColours.background },
+  centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
+  errorText: { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
   content:   { padding: 16, paddingTop: 60, paddingBottom: 48 },
   title:     { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
 
@@ -392,7 +400,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  toggleBtn:        { flex: 1, paddingVertical: 8, borderRadius: 9, alignItems: 'center' },
+  toggleBtn:        { flex: 1, paddingVertical: 12, minHeight: 44, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   toggleBtnActive:  { backgroundColor: AppColours.primary },
   toggleText:       { fontSize: 14, fontWeight: '600', color: AppColours.subtext },
   toggleTextActive: { color: '#fff' },

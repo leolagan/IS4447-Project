@@ -2,6 +2,8 @@ import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
+import { formatDisplayDate } from '@/utils/dateHelpers';
+import { formatUnit, formatValue as sharedFormatValue } from '@/utils/formatters';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -25,18 +27,9 @@ export default function HabitDetailScreen() {
     ]);
   }
 
-  function formatMinutes(mins: number) {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
-  }
-
   function formatValue(value: number) {
     if (habit?.metricType === 'boolean') return value === 1 ? 'Done' : 'Not Done';
-    if (habit?.unit === 'hrs/mins') return formatMinutes(value);
-    return `${value} ${habit?.unit ?? ''}`;
+    return sharedFormatValue(value, habit?.unit ?? '', habit?.metricType ?? '');
   }
 
   if (!habit) {
@@ -62,15 +55,15 @@ export default function HabitDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.habitCard, { borderLeftColor: category?.colour ?? '#ccc' }]}>
+      <View style={[styles.habitCard, { borderLeftColor: category?.color ?? '#ccc' }]}>
         <Text style={styles.habitName}>{habit.name}</Text>
         <View style={styles.tagRow}>
-          <View style={[styles.tag, { backgroundColor: (category?.colour ?? '#ccc') + '25' }]}>
-            <Text style={[styles.tagText, { color: category?.colour ?? '#ccc' }]}>
+          <View style={[styles.tag, { backgroundColor: (category?.color ?? '#ccc') + '25' }]}>
+            <Text style={[styles.tagText, { color: category?.color ?? '#ccc' }]}>
               {category?.name}
             </Text>
           </View>
-          <Text style={styles.unit}>{habit.unit}</Text>
+          <Text style={styles.unit}>{formatUnit(habit.unit, habit.metricType)}</Text>
         </View>
       </View>
 
@@ -84,7 +77,7 @@ export default function HabitDetailScreen() {
           <Animated.View entering={FadeInDown.delay(index * 60).springify()}>
             <View style={styles.logCard}>
               <View style={styles.logLeft}>
-                <Text style={styles.logDate}>{item.date}</Text>
+                <Text style={styles.logDate}>{formatDisplayDate(item.date)}</Text>
                 <Text style={styles.logValue}>{formatValue(item.value)}</Text>
                 {item.notes ? <Text style={styles.logNotes}>{item.notes}</Text> : null}
               </View>
@@ -92,12 +85,18 @@ export default function HabitDetailScreen() {
                 <TouchableOpacity
                   style={styles.editBtn}
                   onPress={() => router.push(`/log/edit/${item.id}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Edit log"
+                  hitSlop={{ top: 8, bottom: 8 }}
                 >
                   <Text style={styles.editBtnText}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteBtn}
                   onPress={() => confirmDeleteLog(item.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Delete log"
+                  hitSlop={{ top: 8, bottom: 8 }}
                 >
                   <Text style={styles.deleteBtnText}>Delete</Text>
                 </TouchableOpacity>
@@ -117,6 +116,8 @@ export default function HabitDetailScreen() {
         style={styles.fab}
         onPress={() => router.push(`/log/new?habitId=${habitId}`)}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add log for this habit"
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

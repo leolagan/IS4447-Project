@@ -1,12 +1,13 @@
 import ColourPicker from '@/components/ui/ColourPicker';
 import FormField from '@/components/ui/FormField';
+import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
-const DEFAULT_COLOUR = '#FF6B6B';
+const DEFAULT_COLOUR = '#1C8DB3';
 
 export default function NewCategoryScreen() {
   const router = useRouter();
@@ -43,9 +44,7 @@ export default function NewCategoryScreen() {
           <Text style={styles.previewName}>{name || 'Preview'}</Text>
         </View>
 
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Text style={styles.saveBtnText}>Save Category</Text>
-        </TouchableOpacity>
+        <PrimaryButton title="Save Category" onPress={handleSave} />
 
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.cancel}>Cancel</Text>
@@ -74,7 +73,5 @@ const styles = StyleSheet.create({
   },
   previewSwatch: { width: 28, height: 28, borderRadius: 14 },
   previewName:   { fontSize: 16, fontWeight: '600', color: AppColours.text },
-  saveBtn:       { backgroundColor: AppColours.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
-  saveBtnText:   { color: '#fff', fontSize: 16, fontWeight: '600' },
   cancel:        { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

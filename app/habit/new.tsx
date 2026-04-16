@@ -1,5 +1,6 @@
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
+import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
@@ -29,7 +30,7 @@ export default function NewHabitScreen() {
   const categoryOptions = categories.map(c => ({
     label: c.name,
     value: String(c.id),
-    colour: c.colour,
+    colour: c.color,
   }));
 
   async function handleSave() {
@@ -98,9 +99,7 @@ export default function NewHabitScreen() {
         onSelect={value => setCategoryId(Number(value))}
       />
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>Save Habit</Text>
-      </TouchableOpacity>
+      <PrimaryButton title="Save Habit" onPress={handleSave} />
 
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.cancel}>Cancel</Text>
@@ -119,7 +118,5 @@ const styles = StyleSheet.create({
   toggleActive:     { backgroundColor: AppColours.primary },
   toggleText:       { fontSize: 14, fontWeight: '500', color: AppColours.text },
   toggleTextActive: { color: '#fff' },
-  saveBtn:          { backgroundColor: AppColours.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
-  saveBtnText:      { color: '#fff', fontSize: 16, fontWeight: '600' },
   cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

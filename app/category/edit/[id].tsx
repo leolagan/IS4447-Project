@@ -1,5 +1,6 @@
 import ColourPicker from '@/components/ui/ColourPicker';
 import FormField from '@/components/ui/FormField';
+import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,7 +13,7 @@ export default function EditCategoryScreen() {
   const { categories, updateCategory } = useCategories();
 
   const [name, setName] = useState('');
-  const [colour, setColour] = useState('#FF6B6B');
+  const [colour, setColour] = useState('#1C8DB3');
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function EditCategoryScreen() {
       const cat = categories.find(c => c.id === Number(id));
       if (cat) {
         setName(cat.name);
-        setColour(cat.colour);
+        setColour(cat.color);
         setLoaded(true);
       }
     }
@@ -54,9 +55,7 @@ export default function EditCategoryScreen() {
           <Text style={styles.previewName}>{name || 'Preview'}</Text>
         </View>
 
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Text style={styles.saveBtnText}>Save Changes</Text>
-        </TouchableOpacity>
+        <PrimaryButton title="Save Changes" onPress={handleSave} variant="edit" />
 
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.cancel}>Cancel</Text>
@@ -85,7 +84,5 @@ const styles = StyleSheet.create({
   },
   previewSwatch: { width: 28, height: 28, borderRadius: 14 },
   previewName:   { fontSize: 16, fontWeight: '600', color: AppColours.text },
-  saveBtn:       { backgroundColor: AppColours.edit, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
-  saveBtnText:   { color: '#fff', fontSize: 16, fontWeight: '600' },
   cancel:        { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
 });

@@ -6,14 +6,24 @@ import { useCallback, useState } from 'react';
 
 export function useLogs(habitId?: number) {
   const [data, setData] = useState<typeof habitLogs.$inferSelect[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    if (habitId) {
-      const result = await db.select().from(habitLogs).where(eq(habitLogs.habitId, habitId));
-      setData(result);
-    } else {
-      const result = await db.select().from(habitLogs);
-      setData(result);
+    setIsLoading(true);
+    try {
+      if (habitId) {
+        const result = await db.select().from(habitLogs).where(eq(habitLogs.habitId, habitId));
+        setData(result);
+      } else {
+        const result = await db.select().from(habitLogs);
+        setData(result);
+      }
+      setError(null);
+    } catch {
+      setError('Failed to load logs.');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -38,5 +48,5 @@ export function useLogs(habitId?: number) {
     load();
   }
 
-  return { logs: data, addLog, updateLog, deleteLog, reload: load };
+  return { logs: data, addLog, updateLog, deleteLog, reload: load, isLoading, error };
 }

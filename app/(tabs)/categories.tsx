@@ -4,11 +4,11 @@ import { habits } from '@/db/schema';
 import { useCategories } from '@/hooks/useCategories';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export default function CategoriesScreen() {
-  const { categories, deleteCategory } = useCategories();
+  const { categories, deleteCategory, isLoading, error } = useCategories();
   const router = useRouter();
   const [habitCounts, setHabitCounts] = useState<Record<number, number>>({});
 
@@ -40,6 +40,22 @@ export default function CategoriesScreen() {
     ]);
   }
 
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={AppColours.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Categories</Text>
@@ -57,7 +73,7 @@ export default function CategoriesScreen() {
                 onLongPress={() => confirmDelete(item.id, item.name)}
                 activeOpacity={0.75}
               >
-                <View style={[styles.swatch, { backgroundColor: item.colour }]} />
+                <View style={[styles.swatch, { backgroundColor: item.color }]} />
                 <View style={styles.cardBody}>
                   <Text style={styles.name}>{item.name}</Text>
                   <Text style={styles.count}>
@@ -68,6 +84,8 @@ export default function CategoriesScreen() {
                   style={styles.editBtn}
                   onPress={() => router.push(`/category/edit/${item.id}`)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Edit ${item.name} category`}
                 >
                   <Text style={styles.editBtnText}>Edit</Text>
                 </TouchableOpacity>
@@ -86,6 +104,8 @@ export default function CategoriesScreen() {
         style={styles.fab}
         onPress={() => router.push('/category/new')}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add new category"
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -95,6 +115,8 @@ export default function CategoriesScreen() {
 
 const styles = StyleSheet.create({
   container:      { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  centered:       { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
+  errorText:      { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
   title:          { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
   card: {
     backgroundColor: AppColours.card,
@@ -114,7 +136,7 @@ const styles = StyleSheet.create({
   cardBody:       { flex: 1 },
   name:           { fontSize: 16, fontWeight: '600', color: AppColours.text },
   count:          { fontSize: 13, color: AppColours.subtext, marginTop: 2 },
-  editBtn:        { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+  editBtn:        { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 8 },
   editBtnText:    { color: AppColours.edit, fontWeight: '600', fontSize: 13 },
   emptyContainer: { alignItems: 'center', marginTop: 80 },
   empty:          { fontSize: 15, color: AppColours.subtext },

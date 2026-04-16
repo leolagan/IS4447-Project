@@ -1,5 +1,6 @@
 import { db } from '@/db/client';
 import { habitLogs, habits, targets } from '@/db/schema';
+import { getMonthRange, getWeekRange } from '@/utils/dateHelpers';
 import { useFocusEffect } from '@react-navigation/native';
 import { eq } from 'drizzle-orm';
 import { useCallback, useState } from 'react';
@@ -19,33 +20,14 @@ export type TargetWithProgress = {
   isExceeded: boolean;
 };
 
-function getWeekRange(): { start: string; end: string } {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  return {
-    start: monday.toISOString().split('T')[0],
-    end: sunday.toISOString().split('T')[0],
-  };
-}
-
-function getMonthRange(): { start: string; end: string } {
-  const today = new Date();
-  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  return {
-    start: firstDay.toISOString().split('T')[0],
-    end: lastDay.toISOString().split('T')[0],
-  };
-}
-
 export function useTargets() {
   const [data, setData] = useState<TargetWithProgress[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    setIsLoading(true);
+    try {
     const allTargets = await db.select().from(targets);
     const allHabits  = await db.select().from(habits);
     const allLogs    = await db.select().from(habitLogs);
@@ -93,6 +75,12 @@ export function useTargets() {
       .filter((t): t is TargetWithProgress => t !== null);
 
     setData(enriched);
+    setError(null);
+    } catch {
+      setError('Failed to load targets.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useFocusEffect(
@@ -116,5 +104,5 @@ export function useTargets() {
     load();
   }
 
-  return { targets: data, addTarget, updateTarget, deleteTarget, reload: load };
+  return { targets: data, addTarget, updateTarget, deleteTarget, reload: load, isLoading, error };
 }

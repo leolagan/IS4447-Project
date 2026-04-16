@@ -1,21 +1,10 @@
 import { AppColours } from '@/constants/theme';
 import { useCategories } from '@/hooks/useCategories';
 import { useTargets, type TargetWithProgress } from '@/hooks/useTargets';
+import { formatValue } from '@/utils/formatters';
 import { useRouter } from 'expo-router';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-
-function formatMinutes(mins: number): string {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `${h}h ${m}m`;
-}
-
-function formatValue(value: number, unit: string, metricType: string): string {
-  if (unit === 'hrs/mins') return formatMinutes(value);
-  if (metricType === 'boolean') return `${value} times`;
-  return `${value} ${unit}`;
-}
 
 function getBarColour(item: TargetWithProgress): string {
   if (item.isExceeded) return '#FA5252';
@@ -34,12 +23,12 @@ function getStatusLabel(item: TargetWithProgress): string {
 }
 
 export default function TargetsScreen() {
-  const { targets, deleteTarget } = useTargets();
+  const { targets, deleteTarget, isLoading, error } = useTargets();
   const { categories } = useCategories();
   const router = useRouter();
 
   function getCategoryColour(categoryId: number): string {
-    return categories.find(c => c.id === categoryId)?.colour ?? '#ccc';
+    return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
   }
 
   function confirmDelete(id: number) {
@@ -54,6 +43,22 @@ export default function TargetsScreen() {
     const goalFormatted = formatValue(item.goal, item.habitUnit, item.habitMetricType);
     const period = item.type === 'weekly' ? 'this week' : 'this month';
     return `${dirText} ${goalFormatted} ${period}`;
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={AppColours.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
   }
 
   return (
@@ -136,7 +141,13 @@ export default function TargetsScreen() {
         }
       />
 
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/target/new')} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => router.push('/target/new')}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Add new target"
+      >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
@@ -145,6 +156,8 @@ export default function TargetsScreen() {
 
 const styles = StyleSheet.create({
   container:         { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
+  centered:          { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
+  errorText:         { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
   title:             { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
   card: {
     backgroundColor: AppColours.card,

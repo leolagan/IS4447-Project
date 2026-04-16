@@ -6,10 +6,20 @@ import { useCallback, useState } from 'react';
 
 export function useCategories() {
   const [data, setData] = useState<typeof categories.$inferSelect[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const result = await db.select().from(categories);
-    setData(result);
+    setIsLoading(true);
+    try {
+      const result = await db.select().from(categories);
+      setData(result);
+      setError(null);
+    } catch {
+      setError('Failed to load categories.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useFocusEffect(
@@ -18,13 +28,13 @@ export function useCategories() {
     }, [])
   );
 
-  async function addCategory(name: string, colour: string) {
-    await db.insert(categories).values({ name, colour });
+  async function addCategory(name: string, color: string) {
+    await db.insert(categories).values({ name, color });
     load();
   }
 
-  async function updateCategory(id: number, name: string, colour: string) {
-    await db.update(categories).set({ name, colour }).where(eq(categories.id, id));
+  async function updateCategory(id: number, name: string, color: string) {
+    await db.update(categories).set({ name, color }).where(eq(categories.id, id));
     load();
   }
 
@@ -38,5 +48,5 @@ export function useCategories() {
     return null;
   }
 
-  return { categories: data, addCategory, updateCategory, deleteCategory, reload: load };
+  return { categories: data, addCategory, updateCategory, deleteCategory, reload: load, isLoading, error };
 }
