@@ -6,7 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -18,6 +18,26 @@ function makeStyles(c: typeof AppColours) {
     logo:      { width: 48, height: 48, alignSelf: 'center', marginBottom: 8 },
     brand:     { fontSize: 13, fontWeight: '700', color: c.primary, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 2 },
     title:     { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 12 },
+
+    // Quote card
+    quoteCard: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 16,
+      borderLeftWidth: 3,
+      borderLeftColor: c.primary,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    quoteText:    { fontSize: 14, fontStyle: 'italic', color: c.text, lineHeight: 20, marginBottom: 8 },
+    quoteAuthor:  { fontSize: 12, fontWeight: '600', color: c.subtext, marginBottom: 12 },
+    quoteError:   { fontSize: 14, color: c.subtext, marginBottom: 12 },
+    quoteBtn:     { alignSelf: 'flex-start', backgroundColor: c.primaryLight, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 },
+    quoteBtnText: { fontSize: 13, fontWeight: '600', color: c.primary },
 
     filterToggle: {
       flexDirection: 'row',
@@ -104,6 +124,26 @@ export default function HabitsScreen() {
   const [selectedCategoryId, setSelectedCat] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen]        = useState(false);
 
+  const [quote, setQuote]               = useState<{ content: string; author: string } | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError]     = useState(false);
+
+  async function fetchQuote() {
+    setQuoteLoading(true);
+    setQuoteError(false);
+    try {
+      const res  = await fetch('https://zenquotes.io/api/random');
+      const data = await res.json();
+      setQuote({ content: data[0].q, author: data[0].a });
+    } catch {
+      setQuoteError(true);
+    } finally {
+      setQuoteLoading(false);
+    }
+  }
+
+  useEffect(() => { fetchQuote(); }, []);
+
   function getCategoryColour(categoryId: number) {
     return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
   }
@@ -161,6 +201,30 @@ export default function HabitsScreen() {
       <Text style={styles.brand}>HabitFlow</Text>
       <Text style={styles.title}>My Habits</Text>
 
+      {/* Motivational quote card */}
+      <View style={styles.quoteCard}>
+        {quoteLoading ? (
+          <ActivityIndicator size="small" color={colours.primary} />
+        ) : quoteError ? (
+          <Text style={styles.quoteError}>Could not load quote.</Text>
+        ) : quote ? (
+          <>
+            <Text style={styles.quoteText}>"{quote.content}"</Text>
+            <Text style={styles.quoteAuthor}>— {quote.author}</Text>
+          </>
+        ) : null}
+        <TouchableOpacity
+          style={styles.quoteBtn}
+          onPress={fetchQuote}
+          disabled={quoteLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Get new quote"
+        >
+          <Text style={styles.quoteBtnText}>New Quote</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Filter toggle button */}
       <TouchableOpacity
         style={styles.filterToggle}
         onPress={() => setFiltersOpen(v => !v)}
@@ -178,6 +242,7 @@ export default function HabitsScreen() {
         )}
       </TouchableOpacity>
 
+      {/* Collapsible filter panel */}
       {filtersOpen && (
         <View style={styles.filterPanel}>
           <FormField
