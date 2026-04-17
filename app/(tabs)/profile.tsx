@@ -4,10 +4,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { users } from '@/db/schema';
+import * as Notifications from 'expo-notifications';
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
@@ -47,6 +48,13 @@ function makeStyles(c: typeof AppColours) {
     toggleActive:     { backgroundColor: c.primary },
     toggleText:       { fontSize: 14, fontWeight: '500', color: c.text },
     toggleTextActive: { color: '#fff' },
+    reminderConfirm: {
+      fontSize: 13,
+      color: c.primary,
+      textAlign: 'center',
+      marginTop: 8,
+      marginBottom: 16,
+    },
   });
 }
 
@@ -55,6 +63,35 @@ export default function ProfileScreen() {
   const { isDark, toggleTheme, colours } = useTheme();
   const router = useRouter();
   const styles = useMemo(() => makeStyles(colours), [colours]);
+
+  const [reminderSet, setReminderSet] = useState(false);
+
+  async function handleSetReminder() {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'Default',
+        importance: Notifications.AndroidImportance.HIGH,
+      });
+    }
+
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Please enable notifications in your device settings.');
+      return;
+    }
+
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'HabitFlow Reminder',
+        body: "Don't forget to log your habits today!",
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 10 },
+    });
+
+    setReminderSet(true);
+  }
 
   function handleLogout() {
     setUser(null);
@@ -110,6 +147,11 @@ export default function ProfileScreen() {
           <Text style={[styles.toggleText, isDark && styles.toggleTextActive]}>Dark</Text>
         </TouchableOpacity>
       </View>
+
+      <PrimaryButton title="Set Daily Reminder" onPress={handleSetReminder} />
+      {reminderSet && (
+        <Text style={styles.reminderConfirm}>Reminder set — notification in ~10 seconds</Text>
+      )}
 
       <PrimaryButton title="Log Out" onPress={handleLogout} variant="edit" />
       <PrimaryButton title="Delete Account" onPress={handleDeleteAccount} variant="danger" />
