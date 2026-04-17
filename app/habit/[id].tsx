@@ -106,7 +106,6 @@ export default function HabitDetailScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📋</Text>
             <Text style={styles.empty}>No logs yet. Tap + to add one.</Text>
           </View>
         }

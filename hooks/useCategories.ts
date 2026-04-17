@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { db } from '@/db/client';
 import { categories, habits } from '@/db/schema';
 import { useFocusEffect } from '@react-navigation/native';
@@ -5,14 +6,16 @@ import { eq } from 'drizzle-orm';
 import { useCallback, useState } from 'react';
 
 export function useCategories() {
+  const { user } = useAuth();
   const [data, setData] = useState<typeof categories.$inferSelect[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const result = await db.select().from(categories);
+      const result = await db.select().from(categories).where(eq(categories.userId, user.id));
       setData(result);
       setError(null);
     } catch {
@@ -25,11 +28,12 @@ export function useCategories() {
   useFocusEffect(
     useCallback(() => {
       load();
-    }, [])
+    }, [user?.id])
   );
 
   async function addCategory(name: string, color: string) {
-    await db.insert(categories).values({ name, color });
+    if (!user) return;
+    await db.insert(categories).values({ userId: user.id, name, color });
     load();
   }
 

@@ -135,7 +135,6 @@ export default function TargetsScreen() {
         }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🎯</Text>
             <Text style={styles.empty}>No targets yet. Tap + to add one.</Text>
           </View>
         }

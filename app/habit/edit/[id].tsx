@@ -11,9 +11,7 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 const UNIT_OPTIONS = [
   { label: 'km', value: 'km' },
   { label: 'grams', value: 'grams' },
-  { label: 'minutes', value: 'minutes' },
   { label: 'hrs/mins', value: 'hrs/mins' },
-  { label: 'steps', value: 'steps' },
   { label: 'calories', value: 'calories' },
 ];
 

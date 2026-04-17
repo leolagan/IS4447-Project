@@ -1,50 +1,40 @@
-# Welcome to your Expo app 👋
+# HabitFlow
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A production-style habit tracking mobile app built with React Native (Expo) and Drizzle ORM for IS4447.
 
-## Get started
+## Tech Stack
 
-1. Install dependencies
+- **React Native** (Expo) — cross-platform mobile UI
+- **Expo Router** — file-based navigation
+- **Drizzle ORM + expo-sqlite** — local SQLite database
+- **TypeScript**
 
+## Features
+
+- Create and manage habits with categories, metrics, and notes
+- Log daily habit activity (completion or count-based)
+- Set weekly and monthly targets with progress tracking
+- View insights and charts (daily, weekly, monthly breakdowns)
+- Search and filter logs by date range, category, and text
+- Accessible UI with meaningful empty and error states
+
+## Getting Started
+
+1. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. Start the app:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Scan the QR code with Expo Go (iOS or Android) or run in a simulator.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Data & Privacy
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- All data is stored **locally on the device** using SQLite via Drizzle ORM (`db/habittracker.db`).
+- No data is sent to any external server or third-party service.
+- No API keys, tokens, or secrets are committed to this repository.
+- Any `.env` files (e.g., for future API integrations) are covered by `.gitignore` and will never be committed.

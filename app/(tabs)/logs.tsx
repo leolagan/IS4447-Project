@@ -211,7 +211,6 @@ export default function LogsScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>{filtersActive ? '🔍' : '📋'}</Text>
             <Text style={styles.empty}>
               {filtersActive ? 'No logs match your filters.' : 'No logs yet. Tap + to add one.'}
             </Text>

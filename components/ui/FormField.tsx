@@ -8,6 +8,7 @@ type Props = {
   multiline?: boolean;
   keyboardType?: 'default' | 'numeric';
   editable?: boolean;
+  secureTextEntry?: boolean;
 };
 
 export default function FormField({
@@ -18,6 +19,7 @@ export default function FormField({
   multiline,
   keyboardType,
   editable = true,
+  secureTextEntry = false,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -31,6 +33,7 @@ export default function FormField({
         multiline={multiline}
         keyboardType={keyboardType ?? 'default'}
         editable={editable}
+        secureTextEntry={secureTextEntry}
         accessibilityLabel={label}
       />
     </View>

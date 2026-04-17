@@ -1,24 +1,24 @@
+import { useAuth } from '@/context/AuthContext';
 import { db } from '@/db/client';
 import { habitLogs } from '@/db/schema';
 import { useFocusEffect } from '@react-navigation/native';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { useCallback, useState } from 'react';
 
 export function useLogs(habitId?: number) {
+  const { user } = useAuth();
   const [data, setData] = useState<typeof habitLogs.$inferSelect[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    if (!user) return;
     setIsLoading(true);
     try {
-      if (habitId) {
-        const result = await db.select().from(habitLogs).where(eq(habitLogs.habitId, habitId));
-        setData(result);
-      } else {
-        const result = await db.select().from(habitLogs);
-        setData(result);
-      }
+      const result = habitId
+        ? await db.select().from(habitLogs).where(and(eq(habitLogs.userId, user.id), eq(habitLogs.habitId, habitId)))
+        : await db.select().from(habitLogs).where(eq(habitLogs.userId, user.id));
+      setData(result);
       setError(null);
     } catch {
       setError('Failed to load logs.');
@@ -30,11 +30,12 @@ export function useLogs(habitId?: number) {
   useFocusEffect(
     useCallback(() => {
       load();
-    }, [habitId])
+    }, [user?.id, habitId])
   );
 
   async function addLog(habitId: number, date: string, value: number, notes: string) {
-    await db.insert(habitLogs).values({ habitId, date, value, notes });
+    if (!user) return;
+    await db.insert(habitLogs).values({ userId: user.id, habitId, date, value, notes });
     load();
   }
 

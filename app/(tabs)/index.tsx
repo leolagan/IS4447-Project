@@ -143,7 +143,6 @@ export default function HabitsScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>{filtersActive ? '🔍' : '🎯'}</Text>
             <Text style={styles.empty}>
               {filtersActive ? 'No habits match your filters.' : 'No habits yet. Tap + to add one.'}
             </Text>

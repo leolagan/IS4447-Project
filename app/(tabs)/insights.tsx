@@ -312,7 +312,6 @@ export default function InsightsScreen() {
 
       {habits.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Text style={styles.emptyIcon}>📊</Text>
           <Text style={styles.emptyText}>No habits yet.{'\n'}Add some habits to see insights.</Text>
         </View>
       ) : (

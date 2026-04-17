@@ -1,5 +1,6 @@
+import { eq } from 'drizzle-orm';
 import { db } from './client';
-import { categories, habitLogs, habits, targets } from './schema';
+import { categories, habitLogs, habits, targets, users } from './schema';
 
 function daysAgo(n: number): string {
   const d = new Date();
@@ -8,18 +9,26 @@ function daysAgo(n: number): string {
 }
 
 export async function seedIfEmpty() {
-  const existing = await db.select().from(categories);
+  // Check if the sample user already exists — if so, nothing to do
+  const existing = await db.select().from(users).where(eq(users.username, 'demo'));
   if (existing.length > 0) return;
+
+  // Create the sample user
+  const inserted = await db
+    .insert(users)
+    .values({ username: 'demo', password: 'demo123' })
+    .returning();
+  const userId = inserted[0].id;
 
   // ── Categories ────────────────────────────────────────────────────────────
   await db.insert(categories).values([
-    { name: 'Fitness',   color: '#FF6B6B' },
-    { name: 'Nutrition', color: '#51CF66' },
-    { name: 'Wellness',  color: '#845EF7' },
-    { name: 'Recovery',  color: '#339AF0' },
+    { userId, name: 'Fitness',   color: '#FF6B6B' },
+    { userId, name: 'Nutrition', color: '#51CF66' },
+    { userId, name: 'Wellness',  color: '#845EF7' },
+    { userId, name: 'Recovery',  color: '#339AF0' },
   ]);
 
-  const cats      = await db.select().from(categories);
+  const cats      = await db.select().from(categories).where(eq(categories.userId, userId));
   const fitness   = cats.find(c => c.name === 'Fitness')!;
   const nutrition = cats.find(c => c.name === 'Nutrition')!;
   const wellness  = cats.find(c => c.name === 'Wellness')!;
@@ -27,15 +36,15 @@ export async function seedIfEmpty() {
 
   // ── Habits ────────────────────────────────────────────────────────────────
   await db.insert(habits).values([
-    { name: 'Run',          metricType: 'count',   unit: 'km',       categoryId: fitness.id },
-    { name: 'Gym Session',  metricType: 'boolean', unit: 'boolean',  categoryId: fitness.id },
-    { name: 'Protein Goal', metricType: 'count',   unit: 'grams',    categoryId: nutrition.id },
-    { name: 'Screen Time',  metricType: 'count',   unit: 'hrs/mins', categoryId: wellness.id },
-    { name: 'Sleep',        metricType: 'count',   unit: 'hrs/mins', categoryId: recovery.id },
-    { name: 'Stretching',   metricType: 'count',   unit: 'minutes',  categoryId: recovery.id },
+    { userId, name: 'Run',          metricType: 'count',   unit: 'km',       categoryId: fitness.id },
+    { userId, name: 'Gym Session',  metricType: 'boolean', unit: 'boolean',  categoryId: fitness.id },
+    { userId, name: 'Protein Goal', metricType: 'count',   unit: 'grams',    categoryId: nutrition.id },
+    { userId, name: 'Screen Time',  metricType: 'count',   unit: 'hrs/mins', categoryId: wellness.id },
+    { userId, name: 'Sleep',        metricType: 'count',   unit: 'hrs/mins', categoryId: recovery.id },
+    { userId, name: 'Stretching',   metricType: 'count',   unit: 'minutes',  categoryId: recovery.id },
   ]);
 
-  const allHabits  = await db.select().from(habits);
+  const allHabits  = await db.select().from(habits).where(eq(habits.userId, userId));
   const run        = allHabits.find(h => h.name === 'Run')!;
   const gym        = allHabits.find(h => h.name === 'Gym Session')!;
   const protein    = allHabits.find(h => h.name === 'Protein Goal')!;
@@ -52,6 +61,7 @@ export async function seedIfEmpty() {
   const stretchValues  = [15, 20, 15, 25, 20, 15, 30, 20, 15, 25, 20, 15, 20, 25, 15];
 
   const logEntries: {
+    userId: number;
     habitId: number;
     date: string;
     value: number;
@@ -65,6 +75,7 @@ export async function seedIfEmpty() {
     // Run — every 3rd day
     if (i % 3 === 0) {
       logEntries.push({
+        userId,
         habitId: run.id,
         date,
         value: runValues[cycle % runValues.length],
@@ -75,6 +86,7 @@ export async function seedIfEmpty() {
     // Gym — every 2nd day
     if (i % 2 === 0) {
       logEntries.push({
+        userId,
         habitId: gym.id,
         date,
         value: 1,
@@ -85,6 +97,7 @@ export async function seedIfEmpty() {
     // Protein — every day, skip every 5th (realistic misses)
     if (i % 5 !== 0) {
       logEntries.push({
+        userId,
         habitId: protein.id,
         date,
         value: proteinValues[cycle % proteinValues.length],
@@ -94,6 +107,7 @@ export async function seedIfEmpty() {
 
     // Screen Time — every day
     logEntries.push({
+      userId,
       habitId: screenTime.id,
       date,
       value: screenValues[cycle % screenValues.length],
@@ -102,6 +116,7 @@ export async function seedIfEmpty() {
 
     // Sleep — every day
     logEntries.push({
+      userId,
       habitId: sleep.id,
       date,
       value: sleepValues[cycle % sleepValues.length],
@@ -111,6 +126,7 @@ export async function seedIfEmpty() {
     // Stretching — every 3rd day (offset)
     if (i % 3 === 1) {
       logEntries.push({
+        userId,
         habitId: stretching.id,
         date,
         value: stretchValues[cycle % stretchValues.length],
@@ -127,11 +143,11 @@ export async function seedIfEmpty() {
 
   // ── Targets ───────────────────────────────────────────────────────────────
   await db.insert(targets).values([
-    { habitId: run.id,        type: 'weekly',  goal: 20,    direction: 'min' },
-    { habitId: gym.id,        type: 'weekly',  goal: 3,     direction: 'min' },
-    { habitId: protein.id,    type: 'weekly',  goal: 150,   direction: 'min' },
-    { habitId: screenTime.id, type: 'monthly', goal: 3000,  direction: 'max' },
-    { habitId: sleep.id,      type: 'monthly', goal: 12600, direction: 'min' },
-    { habitId: stretching.id, type: 'weekly',  goal: 60,    direction: 'min' },
+    { userId, habitId: run.id,        type: 'weekly',  goal: 20,    direction: 'min' },
+    { userId, habitId: gym.id,        type: 'weekly',  goal: 3,     direction: 'min' },
+    { userId, habitId: protein.id,    type: 'weekly',  goal: 150,   direction: 'min' },
+    { userId, habitId: screenTime.id, type: 'monthly', goal: 3000,  direction: 'max' },
+    { userId, habitId: sleep.id,      type: 'monthly', goal: 12600, direction: 'min' },
+    { userId, habitId: stretching.id, type: 'weekly',  goal: 60,    direction: 'min' },
   ]);
 }
