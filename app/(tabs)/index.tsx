@@ -5,6 +5,8 @@ import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
+import { useLogs } from '@/hooks/useLogs';
+import { calcStreak } from '@/utils/dateHelpers';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -116,6 +118,7 @@ function makeStyles(c: typeof AppColours) {
 export default function HabitsScreen() {
   const { habits, deleteHabit, isLoading, error } = useHabits();
   const { categories }                            = useCategories();
+  const { logs }                                  = useLogs();
   const { colours } = useTheme();
   const router = useRouter();
   const styles = useMemo(() => makeStyles(colours), [colours]);
@@ -276,19 +279,25 @@ export default function HabitsScreen() {
         data={filteredHabits}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 100 }}
-        renderItem={({ item, index }) => (
-          <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
-            <HabitCard
-              name={item.name}
-              unit={item.unit}
-              metricType={item.metricType}
-              categoryColor={getCategoryColour(item.categoryId)}
-              categoryName={getCategoryName(item.categoryId)}
-              onPress={() => router.push(`/habit/${item.id}`)}
-              onLongPress={() => confirmDelete(item.id)}
-            />
-          </Animated.View>
-        )}
+        renderItem={({ item, index }) => {
+          const streak = calcStreak(
+            logs.filter(l => l.habitId === item.id && l.value > 0).map(l => l.date)
+          );
+          return (
+            <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+              <HabitCard
+                name={item.name}
+                unit={item.unit}
+                metricType={item.metricType}
+                categoryColor={getCategoryColour(item.categoryId)}
+                categoryName={getCategoryName(item.categoryId)}
+                streak={streak}
+                onPress={() => router.push(`/habit/${item.id}`)}
+                onLongPress={() => confirmDelete(item.id)}
+              />
+            </Animated.View>
+          );
+        }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.empty}>

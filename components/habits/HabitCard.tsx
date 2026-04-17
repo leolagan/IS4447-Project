@@ -10,6 +10,7 @@ type Props = {
   metricType: string;
   categoryColor: string;
   categoryName: string;
+  streak?: number;
   onPress: () => void;
   onLongPress: () => void;
 };
@@ -36,11 +37,12 @@ function makeStyles(c: typeof AppColours) {
     tag:         { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
     tagText:     { fontSize: 12, fontWeight: '600' },
     unit:        { fontSize: 12, color: c.subtext },
+    streakText:  { fontSize: 12, fontWeight: '700', color: c.primary },
     arrow:       { fontSize: 22, color: c.border, paddingRight: 14 },
   });
 }
 
-export default function HabitCard({ name, unit, metricType, categoryColor, categoryName, onPress, onLongPress }: Props) {
+export default function HabitCard({ name, unit, metricType, categoryColor, categoryName, streak, onPress, onLongPress }: Props) {
   const { colours } = useTheme();
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
@@ -61,6 +63,9 @@ export default function HabitCard({ name, unit, metricType, categoryColor, categ
             <Text style={[styles.tagText, { color: categoryColor }]}>{categoryName}</Text>
           </View>
           <Text style={styles.unit}>{formatUnit(unit, metricType)}</Text>
+          {streak != null && streak > 0 && (
+            <Text style={styles.streakText}>{streak} day streak</Text>
+          )}
         </View>
       </View>
       <Text style={styles.arrow}>›</Text>

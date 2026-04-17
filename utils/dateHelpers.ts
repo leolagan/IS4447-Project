@@ -30,3 +30,24 @@ export function getMonthRange(): { start: string; end: string } {
     end: lastDay.toISOString().split('T')[0],
   };
 }
+
+export function calcStreak(logDates: string[]): number {
+  if (logDates.length === 0) return 0;
+  const DAY = 86400000;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayTs = today.getTime();
+
+  const unique = [...new Set(logDates)]
+    .map(d => { const dt = new Date(d); dt.setHours(0, 0, 0, 0); return dt.getTime(); })
+    .sort((a, b) => b - a);
+
+  // Streak must include today or yesterday to be considered active
+  if (unique[0] !== todayTs && unique[0] !== todayTs - DAY) return 0;
+
+  let streak = 1;
+  for (let i = 1; i < unique.length; i++) {
+    if (unique[i - 1] - unique[i] === DAY) streak++;
+    else break;
+  }
+  return streak;
+}
