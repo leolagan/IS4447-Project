@@ -1,5 +1,6 @@
 import { AppColours } from '@/constants/theme';
-import { useState } from 'react';
+import { useTheme } from '@/context/ThemeContext';
+import { useMemo, useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Option = {
@@ -16,8 +17,65 @@ type Props = {
   onSelect: (value: string) => void;
 };
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container: { marginBottom: 16 },
+    label: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: c.text },
+    selector: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 8,
+      padding: 12,
+      backgroundColor: c.card,
+    },
+    selectorText: { fontSize: 16, color: c.text },
+    placeholder:  { color: c.subtext },
+    arrow:        { fontSize: 16, color: c.subtext },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: c.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingTop: 16,
+      paddingBottom: 40,
+      maxHeight: '60%',
+    },
+    sheetTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: c.text,
+      textAlign: 'center',
+      paddingHorizontal: 20,
+      marginBottom: 12,
+    },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      gap: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    optionSelected:     { backgroundColor: c.primaryLight },
+    dot:                { width: 16, height: 16, borderRadius: 8 },
+    optionText:         { flex: 1, fontSize: 16, color: c.text },
+    optionTextSelected: { color: c.primary, fontWeight: '600' },
+    tick:               { fontSize: 16, color: c.primary, fontWeight: '700' },
+  });
+}
+
 export default function DropdownPicker({ label, options, selected, placeholder = 'Select...', onSelect }: Props) {
   const [open, setOpen] = useState(false);
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
   const selectedLabel = options.find(o => o.value === selected)?.label ?? null;
 
   return (
@@ -56,56 +114,3 @@ export default function DropdownPicker({ label, options, selected, placeholder =
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { marginBottom: 16 },
-  label: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#333' },
-  selector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#fff',
-  },
-  selectorText: { fontSize: 16, color: AppColours.text },
-  placeholder:  { color: '#aaa' },
-  arrow:        { fontSize: 16, color: AppColours.subtext },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 16,
-    paddingBottom: 40,
-    maxHeight: '60%',
-  },
-  sheetTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: AppColours.text,
-    textAlign: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: AppColours.border,
-  },
-  optionSelected:     { backgroundColor: AppColours.primaryLight },
-  dot:                { width: 16, height: 16, borderRadius: 8 },
-  optionText:         { flex: 1, fontSize: 16, color: AppColours.text },
-  optionTextSelected: { color: AppColours.primary, fontWeight: '600' },
-  tick:               { fontSize: 16, color: AppColours.primary, fontWeight: '700' },
-});

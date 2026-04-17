@@ -1,12 +1,32 @@
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:        { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
+    habitBadge:       { backgroundColor: c.primaryLight, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, alignSelf: 'flex-start', marginBottom: 20 },
+    habitBadgeText:   { color: c.primary, fontWeight: '600', fontSize: 14 },
+    label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: c.text },
+    boolRow:          { marginBottom: 16 },
+    toggle:           { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
+    toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: c.card },
+    toggleActive:     { backgroundColor: c.primary },
+    toggleText:       { fontSize: 14, fontWeight: '500', color: c.text },
+    toggleTextActive: { color: '#fff' },
+    timeRow:          { flexDirection: 'row', gap: 12 },
+    timeField:        { flex: 1 },
+    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+  });
+}
 
 export default function EditLogScreen() {
   const router = useRouter();
@@ -14,6 +34,8 @@ export default function EditLogScreen() {
 
   const { habits } = useHabits();
   const { logs, updateLog } = useLogs();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const [date, setDate] = useState('');
   const [value, setValue] = useState('');
@@ -143,20 +165,3 @@ export default function EditLogScreen() {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
-  habitBadge:       { backgroundColor: AppColours.primaryLight, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, alignSelf: 'flex-start', marginBottom: 20 },
-  habitBadgeText:   { color: AppColours.primary, fontWeight: '600', fontSize: 14 },
-  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColours.text },
-  boolRow:          { marginBottom: 16 },
-  toggle:           { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: AppColours.border, overflow: 'hidden' },
-  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColours.card },
-  toggleActive:     { backgroundColor: AppColours.primary },
-  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColours.text },
-  toggleTextActive: { color: '#fff' },
-  timeRow:          { flexDirection: 'row', gap: 12 },
-  timeField:        { flex: 1 },
-  cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
-});

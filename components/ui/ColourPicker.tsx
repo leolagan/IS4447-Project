@@ -1,4 +1,6 @@
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const PRESET_COLOURS = [
@@ -12,7 +14,47 @@ type Props = {
   onSelect: (colour: string) => void;
 };
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 10,
+      color: c.text,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    swatch: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    swatchSelected: {
+      borderWidth: 3,
+      borderColor: c.text,
+    },
+    innerRing: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: '#fff',
+      opacity: 0.7,
+    },
+  });
+}
+
 export default function ColourPicker({ selectedColour, onSelect }: Props) {
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Colour</Text>
@@ -38,38 +80,3 @@ export default function ColourPicker({ selectedColour, onSelect }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  swatch: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  swatchSelected: {
-    borderWidth: 3,
-    borderColor: AppColours.text,
-  },
-  innerRing: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#fff',
-    opacity: 0.7,
-  },
-});

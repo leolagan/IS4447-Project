@@ -66,3 +66,17 @@ export const AppColours = {
   border:       '#DEE2E6',
 };
 
+export const DarkColours = {
+  primary:      '#1C8DB3',
+  primaryLight: '#0D3A4A',
+  edit:         '#2AA7C9',
+  editLight:    '#0A3540',
+  danger:       '#FA5252',
+  dangerLight:  '#3D1010',
+  background:   '#121212',
+  card:         '#1E1E1E',
+  text:         '#F1F3F5',
+  subtext:      '#ADB5BD',
+  border:       '#2C2C2C',
+};
+

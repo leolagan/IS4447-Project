@@ -1,15 +1,66 @@
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { habits } from '@/db/schema';
 import { useCategories } from '@/hooks/useCategories';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:      { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    centered:       { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
+    errorText:      { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
+    title:          { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 20 },
+    card: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      marginBottom: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+      gap: 14,
+    },
+    swatch:         { width: 28, height: 28, borderRadius: 14 },
+    cardBody:       { flex: 1 },
+    name:           { fontSize: 16, fontWeight: '600', color: c.text },
+    count:          { fontSize: 13, color: c.subtext, marginTop: 2 },
+    editBtn:        { backgroundColor: c.editLight, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 8 },
+    editBtnText:    { color: c.edit, fontWeight: '600', fontSize: 13 },
+    emptyContainer: { alignItems: 'center', marginTop: 80 },
+    empty:          { fontSize: 15, color: c.subtext },
+    fab: {
+      position: 'absolute',
+      bottom: 32,
+      right: 24,
+      backgroundColor: c.primary,
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: c.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
+  });
+}
+
 export default function CategoriesScreen() {
   const { categories, deleteCategory, isLoading, error } = useCategories();
+  const { colours } = useTheme();
   const router = useRouter();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
   const [habitCounts, setHabitCounts] = useState<Record<number, number>>({});
 
   useEffect(() => {
@@ -31,9 +82,9 @@ export default function CategoriesScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
-          const error = await deleteCategory(id);
-          if (error) {
-            Alert.alert('Cannot Delete', error);
+          const err = await deleteCategory(id);
+          if (err) {
+            Alert.alert('Cannot Delete', err);
           }
         },
       },
@@ -43,7 +94,7 @@ export default function CategoriesScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={AppColours.primary} />
+        <ActivityIndicator size="large" color={colours.primary} />
       </View>
     );
   }
@@ -112,49 +163,3 @@ export default function CategoriesScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  centered:       { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
-  errorText:      { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-  title:          { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
-  card: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-    gap: 14,
-  },
-  swatch:         { width: 28, height: 28, borderRadius: 14 },
-  cardBody:       { flex: 1 },
-  name:           { fontSize: 16, fontWeight: '600', color: AppColours.text },
-  count:          { fontSize: 13, color: AppColours.subtext, marginTop: 2 },
-  editBtn:        { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 8 },
-  editBtnText:    { color: AppColours.edit, fontWeight: '600', fontSize: 13 },
-  emptyContainer: { alignItems: 'center', marginTop: 80 },
-  empty:          { fontSize: 15, color: AppColours.subtext },
-  fab: {
-    position: 'absolute',
-    bottom: 32,
-    right: 24,
-    backgroundColor: AppColours.primary,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: AppColours.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
-});

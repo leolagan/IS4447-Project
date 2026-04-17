@@ -1,13 +1,14 @@
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate } from '@/utils/dateHelpers';
 import { formatValue as sharedFormatValue } from '@/utils/formatters';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -33,11 +34,134 @@ const DATE_CHIPS: { label: string; value: DateRange }[] = [
   { label: 'Month', value: 'month' },
 ];
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
+    errorText: { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
+    title:     { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 12 },
+
+    filterToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      marginBottom: 12,
+      gap: 8,
+    },
+    filterToggleText: { fontSize: 14, fontWeight: '600', color: c.text },
+    badge: {
+      backgroundColor: c.primary,
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 5,
+    },
+    badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+
+    filterPanel: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      padding: 14,
+      marginBottom: 14,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    chipLabel: { fontSize: 14, fontWeight: '600', color: c.text, marginBottom: 6 },
+    chipRow:   { marginBottom: 12 },
+    chip: {
+      paddingHorizontal: 16,
+      paddingVertical: 11,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+    },
+    chipActive:     { backgroundColor: c.primary, borderColor: c.primary },
+    chipText:       { fontSize: 13, fontWeight: '600', color: c.text },
+    chipTextActive: { color: '#fff' },
+    clearBtn: {
+      backgroundColor: c.dangerLight,
+      borderRadius: 8,
+      paddingVertical: 9,
+      alignItems: 'center',
+    },
+    clearBtnInline: {
+      marginTop: 12,
+      backgroundColor: c.dangerLight,
+      borderRadius: 8,
+      paddingVertical: 9,
+      paddingHorizontal: 20,
+    },
+    clearBtnText: { color: c.danger, fontWeight: '600', fontSize: 14 },
+
+    dateHeader: {
+      fontSize: 13, fontWeight: '700', color: c.subtext,
+      marginBottom: 8, marginTop: 8, textTransform: 'uppercase', letterSpacing: 0.5,
+    },
+    logCard: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      marginBottom: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    categoryBar:   { width: 5, alignSelf: 'stretch' },
+    logBody:       { flex: 1, padding: 14 },
+    habitName:     { fontSize: 16, fontWeight: '700', color: c.text },
+    logValue:      { fontSize: 14, fontWeight: '400', color: c.subtext, marginTop: 2 },
+    logNotes:      { fontSize: 12, color: c.subtext, marginTop: 4 },
+    logActions:    { flexDirection: 'row', gap: 6, paddingRight: 12 },
+    editBtn:       { backgroundColor: c.editLight, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8 },
+    editBtnText:   { color: c.edit, fontWeight: '600', fontSize: 12 },
+    deleteBtn:     { backgroundColor: c.dangerLight, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8 },
+    deleteBtnText: { color: c.danger, fontWeight: '600', fontSize: 12 },
+    emptyContainer: { alignItems: 'center', marginTop: 80 },
+    emptyIcon:      { fontSize: 48, marginBottom: 12 },
+    empty:          { fontSize: 15, color: c.subtext },
+    fab: {
+      position: 'absolute',
+      bottom: 32,
+      right: 24,
+      backgroundColor: c.primary,
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: c.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
+  });
+}
+
 export default function LogsScreen() {
   const router = useRouter();
   const { logs, deleteLog, isLoading, error } = useLogs();
   const { habits }                            = useHabits();
   const { categories }                        = useCategories();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const [searchText, setSearchText]          = useState('');
   const [selectedCategoryId, setSelectedCat] = useState<string | null>(null);
@@ -67,7 +191,6 @@ export default function LogsScreen() {
     ]);
   }
 
-  // Sort and group all logs by date
   const sorted = [...logs].sort((a, b) => b.date.localeCompare(a.date));
   const grouped: { date: string; data: typeof logs }[] = [];
   sorted.forEach(log => {
@@ -76,7 +199,6 @@ export default function LogsScreen() {
     else grouped.push({ date: log.date, data: [log] });
   });
 
-  // Apply filters in-memory
   const { from, to } = getDateBounds(dateRange);
   const search = searchText.trim().toLowerCase();
 
@@ -118,7 +240,7 @@ export default function LogsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={AppColours.primary} />
+        <ActivityIndicator size="large" color={colours.primary} />
       </View>
     );
   }
@@ -135,7 +257,6 @@ export default function LogsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>All Logs</Text>
 
-      {/* Filter toggle button */}
       <TouchableOpacity
         style={styles.filterToggle}
         onPress={() => setFiltersOpen(v => !v)}
@@ -153,7 +274,6 @@ export default function LogsScreen() {
         )}
       </TouchableOpacity>
 
-      {/* Collapsible filter panel */}
       {filtersOpen && (
         <View style={styles.filterPanel}>
           <FormField
@@ -275,125 +395,3 @@ export default function LogsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
-  errorText: { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-  title:     { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 12 },
-
-  // Filter toggle
-  filterToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: AppColours.card,
-    borderWidth: 1,
-    borderColor: AppColours.border,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 12,
-    gap: 8,
-  },
-  filterToggleText: { fontSize: 14, fontWeight: '600', color: AppColours.text },
-  badge: {
-    backgroundColor: AppColours.primary,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-  },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-
-  // Filter panel
-  filterPanel: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  chipLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 6 },
-  chipRow:   { marginBottom: 12 },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: AppColours.border,
-    backgroundColor: AppColours.card,
-  },
-  chipActive:     { backgroundColor: AppColours.primary, borderColor: AppColours.primary },
-  chipText:       { fontSize: 13, fontWeight: '600', color: AppColours.text },
-  chipTextActive: { color: '#fff' },
-  clearBtn: {
-    backgroundColor: AppColours.dangerLight,
-    borderRadius: 8,
-    paddingVertical: 9,
-    alignItems: 'center',
-  },
-  clearBtnInline: {
-    marginTop: 12,
-    backgroundColor: AppColours.dangerLight,
-    borderRadius: 8,
-    paddingVertical: 9,
-    paddingHorizontal: 20,
-  },
-  clearBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 14 },
-
-  // Log list (unchanged)
-  dateHeader: {
-    fontSize: 13, fontWeight: '700', color: AppColours.subtext,
-    marginBottom: 8, marginTop: 8, textTransform: 'uppercase', letterSpacing: 0.5,
-  },
-  logCard: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  categoryBar:   { width: 5, alignSelf: 'stretch' },
-  logBody:       { flex: 1, padding: 14 },
-  habitName:     { fontSize: 16, fontWeight: '700', color: AppColours.text },
-  logValue:      { fontSize: 14, fontWeight: '400', color: AppColours.subtext, marginTop: 2 },
-  logNotes:      { fontSize: 12, color: AppColours.subtext, marginTop: 4 },
-  logActions:    { flexDirection: 'row', gap: 6, paddingRight: 12 },
-  editBtn:       { backgroundColor: AppColours.editLight, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8 },
-  editBtnText:   { color: AppColours.edit, fontWeight: '600', fontSize: 12 },
-  deleteBtn:     { backgroundColor: AppColours.dangerLight, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8 },
-  deleteBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 12 },
-  emptyContainer: { alignItems: 'center', marginTop: 80 },
-  emptyIcon:      { fontSize: 48, marginBottom: 12 },
-  empty:          { fontSize: 15, color: AppColours.subtext },
-  fab: {
-    position: 'absolute',
-    bottom: 32,
-    right: 24,
-    backgroundColor: AppColours.primary,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: AppColours.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
-});

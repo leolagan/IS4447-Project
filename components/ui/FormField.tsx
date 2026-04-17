@@ -1,3 +1,6 @@
+import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
+import { useMemo } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 type Props = {
@@ -11,6 +14,38 @@ type Props = {
   secureTextEntry?: boolean;
 };
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 6,
+      color: c.text,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 16,
+      backgroundColor: c.card,
+      color: c.text,
+    },
+    multiline: {
+      height: 100,
+      textAlignVertical: 'top',
+    },
+    disabled: {
+      backgroundColor: c.background,
+      borderColor: c.border,
+      color: c.subtext,
+    },
+  });
+}
+
 export default function FormField({
   label,
   placeholder,
@@ -21,13 +56,16 @@ export default function FormField({
   editable = true,
   secureTextEntry = false,
 }: Props) {
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         style={[styles.input, multiline && styles.multiline, !editable && styles.disabled]}
         placeholder={placeholder}
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colours.subtext}
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}
@@ -39,32 +77,3 @@ export default function FormField({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 6,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  multiline: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  disabled: {
-    backgroundColor: '#F8F9FA',
-    borderColor: '#DEE2E6',
-    color: '#868E96',
-  },
-});

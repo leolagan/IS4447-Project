@@ -1,5 +1,7 @@
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { formatUnit } from '@/utils/formatters';
+import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Props = {
@@ -12,7 +14,36 @@ type Props = {
   onLongPress: () => void;
 };
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      marginBottom: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    categoryBar: { width: 5, alignSelf: 'stretch' },
+    cardBody:    { flex: 1, padding: 16 },
+    name:        { fontSize: 16, fontWeight: '600', color: c.text },
+    tagRow:      { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
+    tag:         { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
+    tagText:     { fontSize: 12, fontWeight: '600' },
+    unit:        { fontSize: 12, color: c.subtext },
+    arrow:       { fontSize: 22, color: c.border, paddingRight: 14 },
+  });
+}
+
 export default function HabitCard({ name, unit, metricType, categoryColor, categoryName, onPress, onLongPress }: Props) {
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
+
   return (
     <TouchableOpacity
       style={styles.card}
@@ -36,27 +67,3 @@ export default function HabitCard({ name, unit, metricType, categoryColor, categ
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  categoryBar: { width: 5, alignSelf: 'stretch' },
-  cardBody:    { flex: 1, padding: 16 },
-  name:        { fontSize: 16, fontWeight: '600', color: AppColours.text },
-  tagRow:      { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
-  tag:         { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
-  tagText:     { fontSize: 12, fontWeight: '600' },
-  unit:        { fontSize: 12, color: AppColours.subtext },
-  arrow:       { fontSize: 22, color: AppColours.border, paddingRight: 14 },
-});

@@ -1,5 +1,6 @@
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import type { habitLogs, habits } from '@/db/schema';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
@@ -84,44 +85,36 @@ function getMonthlyBuckets(logs: Log[], habit: Habit): ChartBar[] {
 
 // ─── BarChart ─────────────────────────────────────────────────────────────────
 
-function BarChart({ bars, colour, unit, metricType }: {
+function BarChart({ bars, colour, unit, metricType, colours }: {
   bars: ChartBar[];
   colour: string;
   unit: string;
   metricType: string;
+  colours: typeof AppColours;
 }) {
   const CHART_H = 140;
   const LABEL_H = 22;
   const Y_WIDTH  = 58;
   const maxVal   = Math.max(...bars.map(b => b.value), 1);
 
-  // Deduplicate so e.g. boolean max=1 doesn't produce [1×, 1×, 0]
   const rawTicks = [maxVal, Math.round(maxVal / 2), 0];
   const ticks    = rawTicks.filter((v, i, arr) => arr.indexOf(v) === i);
 
   return (
     <View style={{ flexDirection: 'row' }}>
-
-      {/* Y-axis label column */}
       <View style={{ width: Y_WIDTH, paddingRight: 6 }}>
         <View style={{ height: CHART_H, justifyContent: 'space-between' }}>
           {ticks.map((tick, i) => (
-            <Text key={i} style={{ fontSize: 8, color: AppColours.subtext, textAlign: 'right' }}>
+            <Text key={i} style={{ fontSize: 8, color: colours.subtext, textAlign: 'right' }}>
               {formatYLabel(tick, unit, metricType)}
             </Text>
           ))}
         </View>
-        {/* spacer matches X-label row */}
         <View style={{ height: LABEL_H }} />
       </View>
 
-      {/* Bars + X-labels */}
       <View style={{ flex: 1 }}>
-
-        {/* Bar area */}
         <View style={{ height: CHART_H, flexDirection: 'row', alignItems: 'flex-end' }}>
-
-          {/* Horizontal grid lines at 0%, 50%, 100% */}
           {[0, 0.5, 1].map((frac, i) => (
             <View
               key={`g${i}`}
@@ -132,13 +125,12 @@ function BarChart({ bars, colour, unit, metricType }: {
                 left: 0,
                 right: 0,
                 height: 1,
-                backgroundColor: AppColours.border,
+                backgroundColor: colours.border,
                 opacity: 0.6,
               }}
             />
           ))}
 
-          {/* Bars */}
           {bars.map((bar, i) => {
             const barH = bar.value > 0
               ? Math.max((bar.value / maxVal) * CHART_H, 5)
@@ -152,7 +144,7 @@ function BarChart({ bars, colour, unit, metricType }: {
                   style={{
                     width: '75%',
                     height: barH,
-                    backgroundColor: bar.value > 0 ? colour : AppColours.border,
+                    backgroundColor: bar.value > 0 ? colour : colours.border,
                     borderRadius: 4,
                   }}
                 />
@@ -161,11 +153,10 @@ function BarChart({ bars, colour, unit, metricType }: {
           })}
         </View>
 
-        {/* X-axis labels */}
         <View style={{ height: LABEL_H, flexDirection: 'row' }}>
           {bars.map((bar, i) => (
             <View key={i} style={{ flex: 1, alignItems: 'center', paddingTop: 5 }}>
-              <Text style={styles.barLabel}>{bar.label}</Text>
+              <Text style={{ fontSize: 8, color: colours.subtext, textAlign: 'center' }}>{bar.label}</Text>
             </View>
           ))}
         </View>
@@ -176,7 +167,23 @@ function BarChart({ bars, colour, unit, metricType }: {
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, colours }: { label: string; value: string; colours: typeof AppColours }) {
+  const styles = useMemo(() => StyleSheet.create({
+    statCard: {
+      width: '47.5%',
+      backgroundColor: colours.card,
+      borderRadius: 14,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    statLabel: { fontSize: 12, color: colours.subtext, marginBottom: 6, fontWeight: '500' },
+    statValue: { fontSize: 22, fontWeight: '700', color: colours.text },
+  }), [colours]);
+
   return (
     <View style={styles.statCard}>
       <Text style={styles.statLabel}>{label}</Text>
@@ -187,6 +194,66 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ─── makeStyles ───────────────────────────────────────────────────────────────
+
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.background },
+    centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
+    errorText: { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
+    content:   { padding: 16, paddingTop: 60, paddingBottom: 48 },
+    title:     { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 20 },
+
+    toggleRow: {
+      flexDirection: 'row',
+      backgroundColor: c.card,
+      borderRadius: 12,
+      padding: 4,
+      marginBottom: 20,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    toggleBtn:        { flex: 1, paddingVertical: 12, minHeight: 44, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+    toggleBtnActive:  { backgroundColor: c.primary },
+    toggleText:       { fontSize: 14, fontWeight: '600', color: c.subtext },
+    toggleTextActive: { color: '#fff' },
+
+    card: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    cardTitle:    { fontSize: 17, fontWeight: '700', color: c.text, marginBottom: 2 },
+    cardSubtitle: { fontSize: 13, color: c.subtext, marginBottom: 16 },
+
+    noDataBox:  { alignItems: 'center', paddingVertical: 36 },
+    noDataText: { fontSize: 14, color: c.subtext },
+
+    sectionLabel: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: c.subtext,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+    },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+
+    emptyBox:  { alignItems: 'center', marginTop: 80 },
+    emptyIcon: { fontSize: 48, marginBottom: 12 },
+    emptyText: { fontSize: 15, color: c.subtext, textAlign: 'center', lineHeight: 22 },
+  });
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function InsightsScreen() {
@@ -194,6 +261,8 @@ export default function InsightsScreen() {
   const { habits }                 = useHabits();
   const { categories }             = useCategories();
   const { targets }                = useTargets();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const [period, setPeriod]                   = useState<Period>('daily');
   const [selectedHabitId, setSelectedHabitId] = useState<number | null>(null);
@@ -203,17 +272,15 @@ export default function InsightsScreen() {
     [habits, selectedHabitId]
   );
 
-  // Habits where lower is better (e.g. screen time) have a target with direction 'max'
   const isLowerBetter = useMemo(
     () => targets.some(t => t.habitId === selectedHabitId && t.direction === 'max'),
     [targets, selectedHabitId]
   );
 
   function getCategoryColour(categoryId: number): string {
-    return categories.find(c => c.id === categoryId)?.color ?? AppColours.primary;
+    return categories.find(c => c.id === categoryId)?.color ?? colours.primary;
   }
 
-  // Build options for the dropdown — include category colour dot
   const habitOptions = useMemo(
     () => habits.map(h => ({
       label:  h.name,
@@ -268,14 +335,14 @@ export default function InsightsScreen() {
 
   const barColour = selectedHabit
     ? getCategoryColour(selectedHabit.categoryId)
-    : AppColours.primary;
+    : colours.primary;
 
   const hasData = chartBars.some(b => b.value > 0);
 
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={AppColours.primary} />
+        <ActivityIndicator size="large" color={colours.primary} />
       </View>
     );
   }
@@ -292,7 +359,6 @@ export default function InsightsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Insights</Text>
 
-      {/* ── Period toggle ── */}
       <View style={styles.toggleRow}>
         {(['daily', 'weekly', 'monthly'] as Period[]).map(p => (
           <TouchableOpacity
@@ -316,7 +382,6 @@ export default function InsightsScreen() {
         </View>
       ) : (
         <>
-          {/* ── Habit dropdown ── */}
           <DropdownPicker
             label="Habit"
             options={habitOptions}
@@ -325,7 +390,6 @@ export default function InsightsScreen() {
             onSelect={val => setSelectedHabitId(Number(val))}
           />
 
-          {/* ── Chart card ── */}
           <View style={styles.card}>
             {selectedHabit ? (
               <>
@@ -345,6 +409,7 @@ export default function InsightsScreen() {
                     colour={barColour}
                     unit={selectedHabit.unit}
                     metricType={selectedHabit.metricType}
+                    colours={colours}
                   />
                 ) : (
                   <View style={styles.noDataBox}>
@@ -359,15 +424,14 @@ export default function InsightsScreen() {
             )}
           </View>
 
-          {/* ── Summary stats ── */}
           {stats && (
             <>
               <Text style={styles.sectionLabel}>Summary</Text>
               <View style={styles.statsGrid}>
-                <StatCard label="Total"                                     value={stats.total}  />
-                <StatCard label={avgLabel[period]}                          value={stats.avg}    />
-                <StatCard label={isLowerBetter ? 'Best (lowest)' : 'Best'} value={stats.best}   />
-                <StatCard label={activeLabel[period]}                       value={stats.active} />
+                <StatCard label="Total"                                     value={stats.total}  colours={colours} />
+                <StatCard label={avgLabel[period]}                          value={stats.avg}    colours={colours} />
+                <StatCard label={isLowerBetter ? 'Best (lowest)' : 'Best'} value={stats.best}   colours={colours} />
+                <StatCard label={activeLabel[period]}                       value={stats.active} colours={colours} />
               </View>
             </>
           )}
@@ -376,79 +440,3 @@ export default function InsightsScreen() {
     </ScrollView>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColours.background },
-  centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
-  errorText: { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-  content:   { padding: 16, paddingTop: 60, paddingBottom: 48 },
-  title:     { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
-
-  // Period toggle
-  toggleRow: {
-    flexDirection: 'row',
-    backgroundColor: AppColours.card,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  toggleBtn:        { flex: 1, paddingVertical: 12, minHeight: 44, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  toggleBtnActive:  { backgroundColor: AppColours.primary },
-  toggleText:       { fontSize: 14, fontWeight: '600', color: AppColours.subtext },
-  toggleTextActive: { color: '#fff' },
-
-  // Chart card
-  card: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  cardTitle:    { fontSize: 17, fontWeight: '700', color: AppColours.text, marginBottom: 2 },
-  cardSubtitle: { fontSize: 13, color: AppColours.subtext, marginBottom: 16 },
-  barLabel:     { fontSize: 8, color: AppColours.subtext, textAlign: 'center' },
-
-  noDataBox:  { alignItems: 'center', paddingVertical: 36 },
-  noDataText: { fontSize: 14, color: AppColours.subtext },
-
-  // Summary stats
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: AppColours.subtext,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statCard: {
-    width: '47.5%',
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  statLabel: { fontSize: 12, color: AppColours.subtext, marginBottom: 6, fontWeight: '500' },
-  statValue: { fontSize: 22, fontWeight: '700', color: AppColours.text },
-
-  // Empty state
-  emptyBox:  { alignItems: 'center', marginTop: 80 },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 15, color: AppColours.subtext, textAlign: 'center', lineHeight: 22 },
-});

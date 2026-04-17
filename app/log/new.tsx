@@ -2,16 +2,34 @@ import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 function getValuePlaceholder(unit: string): string {
   if (unit === 'hrs/mins') return '';
   return `e.g. 5 ${unit}`;
+}
+
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:        { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
+    label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: c.text },
+    boolRow:          { marginBottom: 16 },
+    toggle:           { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
+    toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: c.card },
+    toggleActive:     { backgroundColor: c.primary },
+    toggleText:       { fontSize: 14, fontWeight: '500', color: c.text },
+    toggleTextActive: { color: '#fff' },
+    timeRow:          { flexDirection: 'row', gap: 12 },
+    timeField:        { flex: 1 },
+    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+  });
 }
 
 export default function NewLogScreen() {
@@ -20,6 +38,8 @@ export default function NewLogScreen() {
 
   const { habits } = useHabits();
   const { addLog } = useLogs();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const today = formatDisplayDate(new Date().toISOString().split('T')[0]);
 
@@ -151,18 +171,3 @@ export default function NewLogScreen() {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
-  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColours.text },
-  boolRow:          { marginBottom: 16 },
-  toggle:           { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: AppColours.border, overflow: 'hidden' },
-  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColours.card },
-  toggleActive:     { backgroundColor: AppColours.primary },
-  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColours.text },
-  toggleTextActive: { color: '#fff' },
-  timeRow:          { flexDirection: 'row', gap: 12 },
-  timeField:        { flex: 1 },
-  cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
-});

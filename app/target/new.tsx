@@ -2,10 +2,11 @@ import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useHabits } from '@/hooks/useHabits';
 import { useTargets } from '@/hooks/useTargets';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 function getGoalPlaceholder(unit: string, metricType: string): string {
@@ -14,10 +15,29 @@ function getGoalPlaceholder(unit: string, metricType: string): string {
   return `e.g. 10 ${unit}`;
 }
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    scroll:           { flex: 1, backgroundColor: c.background },
+    container:        { padding: 16, paddingTop: 60, paddingBottom: 40 },
+    title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
+    label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: c.text },
+    toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 8, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
+    toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: c.card },
+    toggleActive:     { backgroundColor: c.primary },
+    toggleText:       { fontSize: 14, fontWeight: '500', color: c.text },
+    toggleTextActive: { color: '#fff' },
+    timeRow:          { flexDirection: 'row', gap: 12, marginBottom: 16 },
+    timeField:        { flex: 1 },
+    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+  });
+}
+
 export default function NewTargetScreen() {
   const router = useRouter();
   const { habits } = useHabits();
   const { addTarget } = useTargets();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const [habitId, setHabitId] = useState<number | null>(null);
   const [type, setType] = useState<'weekly' | 'monthly'>('weekly');
@@ -177,18 +197,3 @@ export default function NewTargetScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll:           { flex: 1, backgroundColor: AppColours.background },
-  container:        { padding: 16, paddingTop: 60, paddingBottom: 40 },
-  title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
-  label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: AppColours.text },
-  toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 8, borderWidth: 1, borderColor: AppColours.border, overflow: 'hidden' },
-  toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: AppColours.card },
-  toggleActive:     { backgroundColor: AppColours.primary },
-  toggleText:       { fontSize: 14, fontWeight: '500', color: AppColours.text },
-  toggleTextActive: { color: '#fff' },
-  timeRow:          { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  timeField:        { flex: 1 },
-  cancel:           { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
-});

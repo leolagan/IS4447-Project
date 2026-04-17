@@ -1,4 +1,4 @@
-import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 type Props = {
@@ -9,11 +9,13 @@ type Props = {
 };
 
 export default function PrimaryButton({ title, onPress, variant = 'primary', disabled = false }: Props) {
+  const { colours } = useTheme();
+
   const bg = variant === 'edit'
-    ? AppColours.edit
+    ? colours.edit
     : variant === 'danger'
-    ? AppColours.danger
-    : AppColours.primary;
+    ? colours.danger
+    : colours.primary;
 
   return (
     <TouchableOpacity

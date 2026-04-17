@@ -1,12 +1,86 @@
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate } from '@/utils/dateHelpers';
 import { formatUnit, formatValue as sharedFormatValue } from '@/utils/formatters';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:     { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    header:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    back:          { fontSize: 18, color: c.primary, fontWeight: '500' },
+    editHabitBtn:  { backgroundColor: c.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+    editHabitText: { color: c.edit, fontWeight: '600', fontSize: 14 },
+    habitCard: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 24,
+      borderLeftWidth: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    habitName:    { fontSize: 22, fontWeight: 'bold', color: c.text },
+    tagRow:       { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
+    tag:          { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
+    tagText:      { fontSize: 12, fontWeight: '600' },
+    unit:         { fontSize: 13, color: c.subtext },
+    sectionTitle: { fontSize: 18, fontWeight: '700', color: c.text, marginBottom: 12 },
+    logCard: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 10,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+      borderLeftWidth: 4,
+      borderLeftColor: c.border,
+    },
+    logLeft:       { flex: 1 },
+    logDate:       { fontSize: 12, color: c.subtext, marginBottom: 2 },
+    logValue:      { fontSize: 17, fontWeight: '700', color: c.text },
+    logNotes:      { fontSize: 12, color: c.subtext, marginTop: 4 },
+    logActions:    { flexDirection: 'row', gap: 6, marginLeft: 12 },
+    editBtn:       { backgroundColor: c.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+    editBtnText:   { color: c.edit, fontWeight: '600', fontSize: 13 },
+    deleteBtn:     { backgroundColor: c.dangerLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+    deleteBtnText: { color: c.danger, fontWeight: '600', fontSize: 13 },
+    emptyContainer:{ alignItems: 'center', marginTop: 60 },
+    empty:         { fontSize: 15, color: c.subtext },
+    fab: {
+      position: 'absolute',
+      bottom: 32,
+      right: 24,
+      backgroundColor: c.primary,
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: c.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
+  });
+}
 
 export default function HabitDetailScreen() {
   const router = useRouter();
@@ -16,6 +90,8 @@ export default function HabitDetailScreen() {
   const { habits } = useHabits();
   const { logs, deleteLog } = useLogs(habitId);
   const { categories } = useCategories();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const habit = habits.find(h => h.id === habitId);
   const category = categories.find(c => c.id === habit?.categoryId);
@@ -123,74 +199,3 @@ export default function HabitDetailScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container:     { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  header:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  back:          { fontSize: 18, color: AppColours.primary, fontWeight: '500' },
-  editHabitBtn:  { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-  editHabitText: { color: AppColours.edit, fontWeight: '600', fontSize: 14 },
-  habitCard: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  habitName:    { fontSize: 22, fontWeight: 'bold', color: AppColours.text },
-  tagRow:       { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
-  tag:          { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
-  tagText:      { fontSize: 12, fontWeight: '600' },
-  unit:         { fontSize: 13, color: AppColours.subtext },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: AppColours.text, marginBottom: 12 },
-  logCard: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-    borderLeftWidth: 4,
-    borderLeftColor: AppColours.border,
-  },
-  logLeft:       { flex: 1 },
-  logDate:       { fontSize: 12, color: AppColours.subtext, marginBottom: 2 },
-  logValue:      { fontSize: 17, fontWeight: '700', color: AppColours.text },
-  logNotes:      { fontSize: 12, color: AppColours.subtext, marginTop: 4 },
-  logActions:    { flexDirection: 'row', gap: 6, marginLeft: 12 },
-  editBtn:       { backgroundColor: AppColours.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-  editBtnText:   { color: AppColours.edit, fontWeight: '600', fontSize: 13 },
-  deleteBtn:     { backgroundColor: AppColours.dangerLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-  deleteBtnText: { color: AppColours.danger, fontWeight: '600', fontSize: 13 },
-  emptyContainer:{ alignItems: 'center', marginTop: 60 },
-  emptyIcon:     { fontSize: 40, marginBottom: 10 },
-  empty:         { fontSize: 15, color: AppColours.subtext },
-  fab: {
-    position: 'absolute',
-    bottom: 32,
-    right: 24,
-    backgroundColor: AppColours.primary,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: AppColours.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
-});

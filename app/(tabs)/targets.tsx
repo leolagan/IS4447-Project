@@ -1,15 +1,17 @@
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useTargets, type TargetWithProgress } from '@/hooks/useTargets';
 import { formatValue } from '@/utils/formatters';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 function getBarColour(item: TargetWithProgress): string {
   if (item.isExceeded) return '#FA5252';
   if (item.isMet) return '#51CF66';
-  return AppColours.primary;
+  return '#1C8DB3';
 }
 
 function getStatusLabel(item: TargetWithProgress): string {
@@ -22,10 +24,67 @@ function getStatusLabel(item: TargetWithProgress): string {
   return `${formatValue(remaining, item.habitUnit, item.habitMetricType)} to go`;
 }
 
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:         { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    centered:          { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
+    errorText:         { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
+    title:             { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 20 },
+    card: {
+      backgroundColor: c.card,
+      borderRadius: 14,
+      marginBottom: 12,
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    categoryBar:       { width: 5 },
+    cardBody:          { flex: 1, padding: 16 },
+    headerRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+    habitName:         { fontSize: 16, fontWeight: '600', color: c.text, flex: 1, marginRight: 8 },
+    typeBadge:         { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+    weeklyBadge:       { backgroundColor: '#E7F5FF' },
+    monthlyBadge:      { backgroundColor: '#F3D9FA' },
+    typeBadgeText:     { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+    directionText:     { fontSize: 13, color: c.subtext, marginBottom: 10 },
+    progressTrack:     { height: 8, backgroundColor: c.border, borderRadius: 4, overflow: 'hidden', marginBottom: 10 },
+    bottomRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    progressText:      { fontSize: 13, color: c.text, fontWeight: '500' },
+    statusChip:        { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
+    statusMet:         { backgroundColor: '#EBFBEE' },
+    statusExceeded:    { backgroundColor: '#FFF0F0' },
+    statusPending:     { backgroundColor: c.background },
+    statusText:        { fontSize: 12, fontWeight: '600' },
+    statusMetText:     { color: '#2F9E44' },
+    statusExceededText:{ color: '#FA5252' },
+    statusPendingText: { color: c.subtext },
+    emptyContainer:    { alignItems: 'center', marginTop: 80 },
+    emptyIcon:         { fontSize: 48, marginBottom: 12 },
+    empty:             { fontSize: 15, color: c.subtext },
+    fab: {
+      position: 'absolute', bottom: 32, right: 24,
+      backgroundColor: c.primary,
+      width: 58, height: 58, borderRadius: 29,
+      justifyContent: 'center', alignItems: 'center',
+      shadowColor: c.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4, shadowRadius: 8, elevation: 6,
+    },
+    fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
+  });
+}
+
 export default function TargetsScreen() {
   const { targets, deleteTarget, isLoading, error } = useTargets();
   const { categories } = useCategories();
+  const { colours } = useTheme();
   const router = useRouter();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   function getCategoryColour(categoryId: number): string {
     return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
@@ -48,7 +107,7 @@ export default function TargetsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={AppColours.primary} />
+        <ActivityIndicator size="large" color={colours.primary} />
       </View>
     );
   }
@@ -152,56 +211,3 @@ export default function TargetsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container:         { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  centered:          { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppColours.background },
-  errorText:         { color: AppColours.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-  title:             { fontSize: 30, fontWeight: 'bold', color: AppColours.text, marginBottom: 20 },
-  card: {
-    backgroundColor: AppColours.card,
-    borderRadius: 14,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  categoryBar:       { width: 5 },
-  cardBody:          { flex: 1, padding: 16 },
-  headerRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  habitName:         { fontSize: 16, fontWeight: '600', color: AppColours.text, flex: 1, marginRight: 8 },
-  typeBadge:         { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  weeklyBadge:       { backgroundColor: '#E7F5FF' },
-  monthlyBadge:      { backgroundColor: '#F3D9FA' },
-  typeBadgeText:     { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
-  directionText:     { fontSize: 13, color: AppColours.subtext, marginBottom: 10 },
-  progressTrack:     { height: 8, backgroundColor: AppColours.border, borderRadius: 4, overflow: 'hidden', marginBottom: 10 },
-  bottomRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  progressText:      { fontSize: 13, color: AppColours.text, fontWeight: '500' },
-  statusChip:        { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
-  statusMet:         { backgroundColor: '#EBFBEE' },
-  statusExceeded:    { backgroundColor: '#FFF0F0' },
-  statusPending:     { backgroundColor: AppColours.background },
-  statusText:        { fontSize: 12, fontWeight: '600' },
-  statusMetText:     { color: '#2F9E44' },
-  statusExceededText:{ color: '#FA5252' },
-  statusPendingText: { color: AppColours.subtext },
-  emptyContainer:    { alignItems: 'center', marginTop: 80 },
-  emptyIcon:         { fontSize: 48, marginBottom: 12 },
-  empty:             { fontSize: 15, color: AppColours.subtext },
-  fab: {
-    position: 'absolute', bottom: 32, right: 24,
-    backgroundColor: AppColours.primary,
-    width: 58, height: 58, borderRadius: 29,
-    justifyContent: 'center', alignItems: 'center',
-    shadowColor: AppColours.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4, shadowRadius: 8, elevation: 6,
-  },
-  fabText: { color: '#fff', fontSize: 32, lineHeight: 36 },
-});

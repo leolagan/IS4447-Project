@@ -2,15 +2,42 @@ import ColourPicker from '@/components/ui/ColourPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:    { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    title:        { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
+    preview: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.card,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 24,
+      gap: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    previewSwatch: { width: 28, height: 28, borderRadius: 14 },
+    previewName:   { fontSize: 16, fontWeight: '600', color: c.text },
+    cancel:        { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+  });
+}
 
 export default function EditCategoryScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { categories, updateCategory } = useCategories();
+  const { colours } = useTheme();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const [name, setName] = useState('');
   const [colour, setColour] = useState('#1C8DB3');
@@ -64,25 +91,3 @@ export default function EditCategoryScreen() {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: AppColours.background, padding: 16, paddingTop: 60 },
-  title:        { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: AppColours.text },
-  preview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: AppColours.card,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 24,
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  previewSwatch: { width: 28, height: 28, borderRadius: 14 },
-  previewName:   { fontSize: 16, fontWeight: '600', color: AppColours.text },
-  cancel:        { textAlign: 'center', color: AppColours.subtext, fontSize: 16, padding: 16 },
-});
