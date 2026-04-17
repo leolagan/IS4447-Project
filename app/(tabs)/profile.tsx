@@ -4,7 +4,12 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { users } from '@/db/schema';
+import { useHabits } from '@/hooks/useHabits';
+import { useLogs } from '@/hooks/useLogs';
+import { buildCsv } from '@/utils/csvHelpers';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Notifications from 'expo-notifications';
+import * as Sharing from 'expo-sharing';
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -63,6 +68,8 @@ export default function ProfileScreen() {
   const { isDark, toggleTheme, colours } = useTheme();
   const router = useRouter();
   const styles = useMemo(() => makeStyles(colours), [colours]);
+  const { logs }   = useLogs();
+  const { habits } = useHabits();
 
   const [reminderSet, setReminderSet] = useState(false);
 
@@ -91,6 +98,22 @@ export default function ProfileScreen() {
     });
 
     setReminderSet(true);
+  }
+
+  async function handleExport() {
+    const habitMap = Object.fromEntries(habits.map(h => [h.id, h.name]));
+    const csv      = buildCsv(logs, habitMap);
+    const uri      = FileSystem.documentDirectory + 'habitflow-export.csv';
+
+    await FileSystem.writeAsStringAsync(uri, csv, {
+      encoding: 'utf8',
+    });
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, { mimeType: 'text/csv', dialogTitle: 'Export Habit Data' });
+    } else {
+      Alert.alert('Exported', `File saved to:\n${uri}`);
+    }
   }
 
   function handleLogout() {
@@ -152,6 +175,8 @@ export default function ProfileScreen() {
       {reminderSet && (
         <Text style={styles.reminderConfirm}>Reminder set — notification in ~10 seconds</Text>
       )}
+
+      <PrimaryButton title="Export Data (CSV)" onPress={handleExport} />
 
       <PrimaryButton title="Log Out" onPress={handleLogout} variant="edit" />
       <PrimaryButton title="Delete Account" onPress={handleDeleteAccount} variant="danger" />
