@@ -1,40 +1,56 @@
-# HabitFlow
+GitHub Repository URL: https://github.com/leolagan/IS4447-Project.git
 
-A production-style habit tracking mobile app built with React Native (Expo) and Drizzle ORM for IS4447.
+## App Name & Option
 
-## Tech Stack
+- **App Name:** HabitFlow
+- **Assignment Option:** Option A - Habit Tracker
 
-- **React Native** (Expo) — cross-platform mobile UI
-- **Expo Router** — file-based navigation
-- **Drizzle ORM + expo-sqlite** — local SQLite database
-- **TypeScript**
+HabitFlow is a mobile habit tracking app that helps users build and maintain healthy habits through daily logging, streak tracking, and progress insights. The app allows users to create custom habits with categories, set targets, and monitor their progress over time.
+
+
+## Setup Instructions
+
+```bash
+npm install
+npx expo start
+```
+
+## Running the App
+
+
 
 ## Features
 
-- Create and manage habits with categories, metrics, and notes
-- Log daily habit activity (completion or count-based)
-- Set weekly and monthly targets with progress tracking
-- View insights and charts (daily, weekly, monthly breakdowns)
-- Search and filter logs by date range, category, and text
-- Accessible UI with meaningful empty and error states
+- Habit tracking with full CRUD (create, edit, delete)
+- Categories with colour coding
+- Daily log entries with notes
+- Targets (weekly and monthly goals)
+- Search and filtering on the habits screen
+- Insights screen with charts and progress stats
+- Light and dark mode
+- CSV data export
+- Local push notifications
+- Streak tracking
 
-## Getting Started
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Technologies Used
 
-2. Start the app:
-   ```bash
-   npx expo start
-   ```
+- React Native (Expo)
+- Expo Router
+- SQLite (expo-sqlite)
+- Drizzle ORM
+- TypeScript
+- Jest (testing)
 
-   Scan the QR code with Expo Go (iOS or Android) or run in a simulator.
 
-## Data & Privacy
+## Project Structure
 
-- All data is stored **locally on the device** using SQLite via Drizzle ORM (`db/habittracker.db`).
-- No data is sent to any external server or third-party service.
-- No API keys, tokens, or secrets are committed to this repository.
-- Any `.env` files (e.g., for future API integrations) are covered by `.gitignore` and will never be committed.
+```
+app/          → screens and navigation
+components/   → reusable UI components
+context/      → global state (Auth, Theme, Habits)
+db/           → database schema and setup
+hooks/        → custom hooks
+utils/        → helper functions
+__tests__/    → unit, component, and integration tests
+```
