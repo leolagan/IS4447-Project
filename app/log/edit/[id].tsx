@@ -4,7 +4,7 @@ import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
-import { formatDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
+import { formatDisplayDate, isValidDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -63,6 +63,10 @@ export default function EditLogScreen() {
   async function handleSave() {
     if (!date.trim()) {
       Alert.alert('Error', 'Please enter a date.');
+      return;
+    }
+    if (!isValidDisplayDate(date)) {
+      Alert.alert('Error', 'Please enter a valid date in DD/MM/YYYY format.');
       return;
     }
 

@@ -8,6 +8,14 @@ export function parseDisplayDate(displayDate: string): string {
   return `${y}-${m}-${d}`;
 }
 
+export function isValidDisplayDate(s: string): boolean {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return false;
+  const [d, m, y] = s.split('/').map(Number);
+  if (m < 1 || m > 12) return false;
+  const maxDay = new Date(y, m, 0).getDate();
+  return d >= 1 && d <= maxDay;
+}
+
 export function getWeekRange(): { start: string; end: string } {
   const today = new Date();
   const dayOfWeek = today.getDay();

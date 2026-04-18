@@ -82,6 +82,9 @@ export default function NewHabitScreen() {
         <TouchableOpacity
           style={[styles.toggleBtn, metricType === 'count' && styles.toggleActive]}
           onPress={() => setMetricType('count')}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: metricType === 'count' }}
+          accessibilityLabel="Count metric type"
         >
           <Text style={[styles.toggleText, metricType === 'count' && styles.toggleTextActive]}>
             Count
@@ -90,6 +93,9 @@ export default function NewHabitScreen() {
         <TouchableOpacity
           style={[styles.toggleBtn, metricType === 'boolean' && styles.toggleActive]}
           onPress={() => setMetricType('boolean')}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: metricType === 'boolean' }}
+          accessibilityLabel="Done or Not Done metric type"
         >
           <Text style={[styles.toggleText, metricType === 'boolean' && styles.toggleTextActive]}>
             Done / Not Done

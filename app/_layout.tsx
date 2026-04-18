@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/context/AuthContext';
+import { HabitsProvider } from '@/context/HabitsContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { seedIfEmpty } from '@/db/seed';
 import { Stack } from 'expo-router';
@@ -10,10 +11,12 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <HabitsProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </HabitsProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

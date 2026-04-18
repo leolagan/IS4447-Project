@@ -5,7 +5,7 @@ import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
-import { formatDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
+import { formatDisplayDate, isValidDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -66,6 +66,10 @@ export default function NewLogScreen() {
       Alert.alert('Error', 'Please enter a date.');
       return;
     }
+    if (!isValidDisplayDate(date)) {
+      Alert.alert('Error', 'Please enter a valid date in DD/MM/YYYY format.');
+      return;
+    }
 
     const finalValue = habit?.metricType === 'boolean'
       ? (boolValue ? 1 : 0)
@@ -109,12 +113,18 @@ export default function NewLogScreen() {
               <TouchableOpacity
                 style={[styles.toggleBtn, boolValue && styles.toggleActive]}
                 onPress={() => setBoolValue(true)}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: boolValue === true }}
+                accessibilityLabel="Mark as done"
               >
                 <Text style={[styles.toggleText, boolValue && styles.toggleTextActive]}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.toggleBtn, !boolValue && styles.toggleActive]}
                 onPress={() => setBoolValue(false)}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: boolValue === false }}
+                accessibilityLabel="Mark as not done"
               >
                 <Text style={[styles.toggleText, !boolValue && styles.toggleTextActive]}>Not Done</Text>
               </TouchableOpacity>

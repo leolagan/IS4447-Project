@@ -368,6 +368,7 @@ export default function InsightsScreen() {
             activeOpacity={0.75}
             accessibilityRole="button"
             accessibilityLabel={p + ' view'}
+            accessibilityState={{ selected: period === p }}
           >
             <Text style={[styles.toggleText, period === p && styles.toggleTextActive]}>
               {p.charAt(0).toUpperCase() + p.slice(1)}

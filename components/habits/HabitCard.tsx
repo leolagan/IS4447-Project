@@ -53,7 +53,8 @@ export default function HabitCard({ name, unit, metricType, categoryColor, categ
       onLongPress={onLongPress}
       activeOpacity={0.75}
       accessibilityRole="button"
-      accessibilityLabel={`${name}, ${categoryName}`}
+      accessibilityLabel={`${name}, ${categoryName}${streak && streak > 0 ? `, ${streak} day streak` : ''}`}
+      accessibilityHint="Tap to view details, long press to delete"
     >
       <View style={[styles.categoryBar, { backgroundColor: categoryColor }]} />
       <View style={styles.cardBody}>

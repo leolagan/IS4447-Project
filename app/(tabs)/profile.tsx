@@ -156,6 +156,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={[styles.toggleBtn, !isDark && styles.toggleActive]}
           onPress={() => isDark && toggleTheme()}
+          activeOpacity={!isDark ? 1 : 0.7}
           accessibilityRole="button"
           accessibilityLabel="Light mode"
         >
@@ -164,6 +165,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={[styles.toggleBtn, isDark && styles.toggleActive]}
           onPress={() => !isDark && toggleTheme()}
+          activeOpacity={isDark ? 1 : 0.7}
           accessibilityRole="button"
           accessibilityLabel="Dark mode"
         >
