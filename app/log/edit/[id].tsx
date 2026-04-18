@@ -2,7 +2,7 @@ import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { useHabits } from '@/hooks/useHabits';
+import { useHabitsContext } from '@/context/HabitsContext';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate, isValidDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -32,7 +32,7 @@ export default function EditLogScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const { habits } = useHabits();
+  const { habits } = useHabitsContext();
   const { logs, updateLog } = useLogs();
   const { colours } = useTheme();
   const styles = useMemo(() => makeStyles(colours), [colours]);
@@ -110,12 +110,18 @@ export default function EditLogScreen() {
               <TouchableOpacity
                 style={[styles.toggleBtn, boolValue && styles.toggleActive]}
                 onPress={() => setBoolValue(true)}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: boolValue === true }}
+                accessibilityLabel="Mark as done"
               >
                 <Text style={[styles.toggleText, boolValue && styles.toggleTextActive]}>Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.toggleBtn, !boolValue && styles.toggleActive]}
                 onPress={() => setBoolValue(false)}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: boolValue === false }}
+                accessibilityLabel="Mark as not done"
               >
                 <Text style={[styles.toggleText, !boolValue && styles.toggleTextActive]}>Not Done</Text>
               </TouchableOpacity>

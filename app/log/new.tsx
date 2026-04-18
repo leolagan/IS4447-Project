@@ -3,7 +3,7 @@ import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { useHabits } from '@/hooks/useHabits';
+import { useHabitsContext } from '@/context/HabitsContext';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate, isValidDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -36,7 +36,7 @@ export default function NewLogScreen() {
   const router = useRouter();
   const { habitId } = useLocalSearchParams<{ habitId: string }>();
 
-  const { habits } = useHabits();
+  const { habits } = useHabitsContext();
   const { addLog } = useLogs();
   const { colours } = useTheme();
   const styles = useMemo(() => makeStyles(colours), [colours]);

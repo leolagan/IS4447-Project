@@ -4,7 +4,7 @@ import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
-import { useHabits } from '@/hooks/useHabits';
+import { useHabitsContext } from '@/context/HabitsContext';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -33,7 +33,7 @@ function makeStyles(c: typeof AppColours) {
 
 export default function NewHabitScreen() {
   const router = useRouter();
-  const { addHabit } = useHabits();
+  const { addHabit } = useHabitsContext();
   const { categories } = useCategories();
   const { colours } = useTheme();
   const styles = useMemo(() => makeStyles(colours), [colours]);

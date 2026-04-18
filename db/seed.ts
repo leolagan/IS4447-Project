@@ -9,7 +9,7 @@ function daysAgo(n: number): string {
 }
 
 export async function seedIfEmpty() {
-  const existing = await db.select().from(users).where(eq(users.username, 'demo'));
+  const existing = await db.select().from(users).where(eq(users.username, 'Demo'));
   if (existing.length > 0) return;
 
   const inserted = await db
