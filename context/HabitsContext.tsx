@@ -19,6 +19,5 @@ export function HabitsProvider({ children }: { children: ReactNode }) {
 export function useHabitsContext(): HabitsContextType {
   const ctx = useContext(HabitsContext);
   const hook = useHabits();
-  // Fall back to the hook directly when rendered outside the provider (e.g. in tests)
   return ctx ?? hook;
 }

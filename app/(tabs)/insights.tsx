@@ -10,14 +10,10 @@ import { formatMinutes, formatValue } from '@/utils/formatters';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 type Period = 'daily' | 'weekly' | 'monthly';
 type ChartBar = { label: string; value: number };
 type Log = typeof habitLogs.$inferSelect;
 type Habit = typeof habits.$inferSelect;
-
-// ─── Formatters ──────────────────────────────────────────────────────────────
 
 function formatYLabel(value: number, unit: string, metricType: string): string {
   if (value === 0) return '0';
@@ -27,8 +23,6 @@ function formatYLabel(value: number, unit: string, metricType: string): string {
   if (value >= 1000)  return `${(value / 1000).toFixed(1)}k ${unit}`;
   return `${value} ${unit}`;
 }
-
-// ─── Data bucketing ──────────────────────────────────────────────────────────
 
 function sumLogs(logs: Log[], habit: Habit): number {
   if (habit.metricType === 'boolean') return logs.filter(l => l.value === 1).length;
@@ -82,8 +76,6 @@ function getMonthlyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   }
   return bars;
 }
-
-// ─── BarChart ─────────────────────────────────────────────────────────────────
 
 function BarChart({ bars, colour, unit, metricType, colours }: {
   bars: ChartBar[];
@@ -165,8 +157,6 @@ function BarChart({ bars, colour, unit, metricType, colours }: {
   );
 }
 
-// ─── StatCard ─────────────────────────────────────────────────────────────────
-
 function StatCard({ label, value, colours }: { label: string; value: string; colours: typeof AppColours }) {
   const styles = useMemo(() => StyleSheet.create({
     statCard: {
@@ -193,8 +183,6 @@ function StatCard({ label, value, colours }: { label: string; value: string; col
     </View>
   );
 }
-
-// ─── makeStyles ───────────────────────────────────────────────────────────────
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
@@ -253,8 +241,6 @@ function makeStyles(c: typeof AppColours) {
     emptyText: { fontSize: 15, color: c.subtext, textAlign: 'center', lineHeight: 22 },
   });
 }
-
-// ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function InsightsScreen() {
   const { logs, isLoading, error } = useLogs();

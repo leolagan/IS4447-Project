@@ -9,18 +9,15 @@ function daysAgo(n: number): string {
 }
 
 export async function seedIfEmpty() {
-  // Check if the sample user already exists — if so, nothing to do
   const existing = await db.select().from(users).where(eq(users.username, 'demo'));
   if (existing.length > 0) return;
 
-  // Create the sample user
   const inserted = await db
     .insert(users)
-    .values({ username: 'demo', password: 'demo123' })
+    .values({ username: 'Demo', password: 'demo123' })
     .returning();
   const userId = inserted[0].id;
 
-  // ── Categories ────────────────────────────────────────────────────────────
   await db.insert(categories).values([
     { userId, name: 'Fitness',   color: '#FF6B6B' },
     { userId, name: 'Nutrition', color: '#51CF66' },
@@ -34,7 +31,6 @@ export async function seedIfEmpty() {
   const wellness  = cats.find(c => c.name === 'Wellness')!;
   const recovery  = cats.find(c => c.name === 'Recovery')!;
 
-  // ── Habits ────────────────────────────────────────────────────────────────
   await db.insert(habits).values([
     { userId, name: 'Run',          metricType: 'count',   unit: 'km',       categoryId: fitness.id },
     { userId, name: 'Gym Session',  metricType: 'boolean', unit: 'boolean',  categoryId: fitness.id },
@@ -52,8 +48,6 @@ export async function seedIfEmpty() {
   const sleep      = allHabits.find(h => h.name === 'Sleep')!;
   const stretching = allHabits.find(h => h.name === 'Stretching')!;
 
-  // ── Logs — 180 days of history (fills daily, weekly, and monthly charts) ──
-  // Deterministic value arrays — cycled via index so no Math.random needed
   const runValues      = [4, 6, 5, 3, 7, 5, 4, 6, 8, 5, 3, 6, 4, 7, 5];
   const proteinValues  = [145, 160, 120, 175, 155, 140, 160, 130, 165, 150, 145, 170, 135, 155, 150];
   const screenValues   = [180, 210, 150, 240, 120, 175, 155, 200, 130, 190, 165, 220, 145, 170, 180];
@@ -72,7 +66,6 @@ export async function seedIfEmpty() {
     const date  = daysAgo(i);
     const cycle = i % 15;
 
-    // Run — every 3rd day
     if (i % 3 === 0) {
       logEntries.push({
         userId,
@@ -83,7 +76,6 @@ export async function seedIfEmpty() {
       });
     }
 
-    // Gym — every 2nd day
     if (i % 2 === 0) {
       logEntries.push({
         userId,
@@ -94,7 +86,6 @@ export async function seedIfEmpty() {
       });
     }
 
-    // Protein — every day, skip every 5th (realistic misses)
     if (i % 5 !== 0) {
       logEntries.push({
         userId,
@@ -105,7 +96,6 @@ export async function seedIfEmpty() {
       });
     }
 
-    // Screen Time — every day
     logEntries.push({
       userId,
       habitId: screenTime.id,
@@ -114,7 +104,6 @@ export async function seedIfEmpty() {
       notes: i === 5 ? 'Stayed off phone' : null,
     });
 
-    // Sleep — every day
     logEntries.push({
       userId,
       habitId: sleep.id,
@@ -123,7 +112,6 @@ export async function seedIfEmpty() {
       notes: i === 9 ? 'Great sleep' : i === 7 ? 'Late night' : null,
     });
 
-    // Stretching — every 3rd day (offset)
     if (i % 3 === 1) {
       logEntries.push({
         userId,
@@ -135,13 +123,11 @@ export async function seedIfEmpty() {
     }
   }
 
-  // Batch inserts — keeps each statement well under SQLite's parameter limit
   const BATCH_SIZE = 40;
   for (let i = 0; i < logEntries.length; i += BATCH_SIZE) {
     await db.insert(habitLogs).values(logEntries.slice(i, i + BATCH_SIZE));
   }
 
-  // ── Targets ───────────────────────────────────────────────────────────────
   await db.insert(targets).values([
     { userId, habitId: run.id,        type: 'weekly',  goal: 20,    direction: 'min' },
     { userId, habitId: gym.id,        type: 'weekly',  goal: 3,     direction: 'min' },

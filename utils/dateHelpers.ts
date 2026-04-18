@@ -49,7 +49,6 @@ export function calcStreak(logDates: string[]): number {
     .map(d => { const dt = new Date(d); dt.setHours(0, 0, 0, 0); return dt.getTime(); })
     .sort((a, b) => b - a);
 
-  // Streak must include today or yesterday to be considered active
   if (unique[0] !== todayTs && unique[0] !== todayTs - DAY) return 0;
 
   let streak = 1;

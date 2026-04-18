@@ -167,7 +167,6 @@ export default function HabitsScreen() {
 
       <QuoteCard />
 
-      {/* Filter toggle button */}
       <TouchableOpacity
         style={styles.filterToggle}
         onPress={() => setFiltersOpen(v => !v)}
@@ -185,7 +184,6 @@ export default function HabitsScreen() {
         )}
       </TouchableOpacity>
 
-      {/* Collapsible filter panel */}
       {filtersOpen && (
         <View style={styles.filterPanel}>
           <FormField
