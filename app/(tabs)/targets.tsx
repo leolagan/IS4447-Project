@@ -14,6 +14,12 @@ function getBarColour(item: TargetWithProgress): string {
   return '#1C8DB3';
 }
 
+function getStatusChipStyles(item: TargetWithProgress, styles: ReturnType<typeof makeStyles>) {
+  if (item.isExceeded) return { chip: styles.statusExceeded, text: styles.statusExceededText };
+  if (item.isMet)      return { chip: styles.statusMet,      text: styles.statusMetText };
+  return                      { chip: styles.statusPending,  text: styles.statusPendingText };
+}
+
 function getStatusLabel(item: TargetWithProgress): string {
   if (item.isExceeded) {
     const over = item.progress - item.goal;
@@ -85,6 +91,7 @@ export default function TargetsScreen() {
   const { colours } = useTheme();
   const router = useRouter();
   const styles = useMemo(() => makeStyles(colours), [colours]);
+  const getChipStyles = (item: TargetWithProgress) => getStatusChipStyles(item, styles);
 
   function getCategoryColour(categoryId: number): string {
     return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
@@ -140,6 +147,9 @@ export default function TargetsScreen() {
                 onPress={() => router.push(`/target/edit/${item.id}`)}
                 onLongPress={() => confirmDelete(item.id)}
                 activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.habitName} target`}
+                accessibilityHint="Tap to edit, long press to delete"
               >
                 <View style={[styles.categoryBar, { backgroundColor: catColour }]} />
                 <View style={styles.cardBody}>
@@ -175,14 +185,8 @@ export default function TargetsScreen() {
                       {' / '}
                       {formatValue(item.goal, item.habitUnit, item.habitMetricType)}
                     </Text>
-                    <View style={[
-                      styles.statusChip,
-                      item.isExceeded ? styles.statusExceeded : item.isMet ? styles.statusMet : styles.statusPending,
-                    ]}>
-                      <Text style={[
-                        styles.statusText,
-                        item.isExceeded ? styles.statusExceededText : item.isMet ? styles.statusMetText : styles.statusPendingText,
-                      ]}>
+                    <View style={[styles.statusChip, getChipStyles(item).chip]}>
+                      <Text style={[styles.statusText, getChipStyles(item).text]}>
                         {getStatusLabel(item)}
                       </Text>
                     </View>

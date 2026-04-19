@@ -159,6 +159,7 @@ export default function ProfileScreen() {
           activeOpacity={!isDark ? 1 : 0.7}
           accessibilityRole="button"
           accessibilityLabel="Light mode"
+          accessibilityState={{ selected: !isDark }}
         >
           <Text style={[styles.toggleText, !isDark && styles.toggleTextActive]}>Light</Text>
         </TouchableOpacity>
@@ -168,6 +169,7 @@ export default function ProfileScreen() {
           activeOpacity={isDark ? 1 : 0.7}
           accessibilityRole="button"
           accessibilityLabel="Dark mode"
+          accessibilityState={{ selected: isDark }}
         >
           <Text style={[styles.toggleText, isDark && styles.toggleTextActive]}>Dark</Text>
         </TouchableOpacity>

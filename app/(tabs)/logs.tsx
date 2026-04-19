@@ -304,6 +304,7 @@ export default function LogsScreen() {
                 activeOpacity={0.75}
                 accessibilityRole="button"
                 accessibilityLabel={chip.label}
+                accessibilityState={{ selected: dateRange === chip.value }}
               >
                 <Text style={[styles.chipText, dateRange === chip.value && styles.chipTextActive]}>
                   {chip.label}

@@ -123,6 +123,9 @@ export default function CategoriesScreen() {
                 style={styles.card}
                 onLongPress={() => confirmDelete(item.id, item.name)}
                 activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.name} category`}
+                accessibilityHint="Long press to delete"
               >
                 <View style={[styles.swatch, { backgroundColor: item.color }]} />
                 <View style={styles.cardBody}>
