@@ -43,20 +43,24 @@ function getDailyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   return bars;
 }
 
+function localDate(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 function getWeeklyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   const MON_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const today = new Date();
   const currentMonday = new Date(today);
   currentMonday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-  currentMonday.setHours(0, 0, 0, 0);
   const bars: ChartBar[] = [];
   for (let i = 7; i >= 0; i--) {
     const monday = new Date(currentMonday);
     monday.setDate(currentMonday.getDate() - i * 7);
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    const start = monday.toISOString().split('T')[0];
-    const end   = sunday.toISOString().split('T')[0];
+    const start = localDate(monday);
+    const end   = localDate(sunday);
     const bucket = logs.filter(l => l.habitId === habit.id && l.date >= start && l.date <= end);
     bars.push({ label: `${monday.getDate()} ${MON_NAMES[monday.getMonth()]}`, value: sumLogs(bucket, habit) });
   }
