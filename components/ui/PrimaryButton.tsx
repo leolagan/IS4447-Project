@@ -19,7 +19,7 @@ export default function PrimaryButton({ title, onPress, variant = 'primary', dis
 
   return (
     <TouchableOpacity
-      style={[styles.btn, { backgroundColor: bg }, disabled && styles.disabled]}
+      style={[styles.btn, { backgroundColor: bg, shadowColor: bg }, disabled && styles.disabled]}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.8}
@@ -33,15 +33,21 @@ export default function PrimaryButton({ title, onPress, variant = 'primary', dis
 
 const styles = StyleSheet.create({
   btn: {
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 14,
+    padding: 18,
     alignItems: 'center',
     marginTop: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   text: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Sora_600SemiBold',
+    letterSpacing: 0.3,
   },
   disabled: {
     opacity: 0.5,

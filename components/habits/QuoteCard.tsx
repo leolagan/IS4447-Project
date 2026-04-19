@@ -1,28 +1,28 @@
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     quoteCard: {
       backgroundColor: c.card,
-      borderRadius: 14,
-      padding: 16,
+      borderRadius: 16,
+      padding: 20,
       marginBottom: 16,
-      borderLeftWidth: 3,
+      borderLeftWidth: 4,
       borderLeftColor: c.primary,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
     },
-    quoteText:    { fontSize: 14, fontStyle: 'italic', color: c.text, lineHeight: 20, marginBottom: 8 },
-    quoteAuthor:  { fontSize: 12, fontWeight: '600', color: c.subtext, marginBottom: 12 },
-    quoteError:   { fontSize: 14, color: c.subtext, marginBottom: 12 },
-    quoteBtn:     { alignSelf: 'flex-start', backgroundColor: c.primaryLight, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 },
-    quoteBtnText: { fontSize: 13, fontWeight: '600', color: c.primary },
+    quoteIcon:   { fontSize: 36, color: c.primary, lineHeight: 36, marginBottom: 4, fontFamily: 'Sora_700Bold' },
+    quoteText:   { fontSize: 15, fontStyle: 'italic', color: c.text, lineHeight: 24, marginBottom: 8 },
+    quoteAuthor: { fontSize: 12, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.subtext },
+    quoteError:  { fontSize: 14, color: c.subtext },
   });
 }
 
@@ -48,7 +48,7 @@ export default function QuoteCard() {
     }
   }
 
-  useEffect(() => { fetchQuote(); }, []);
+  useFocusEffect(useCallback(() => { fetchQuote(); }, []));
 
   return (
     <View style={styles.quoteCard}>
@@ -58,19 +58,11 @@ export default function QuoteCard() {
         <Text style={styles.quoteError}>Could not load quote.</Text>
       ) : quote ? (
         <>
-          <Text style={styles.quoteText}>"{quote.content}"</Text>
+          <Text style={styles.quoteIcon}>"</Text>
+          <Text style={styles.quoteText}>{quote.content}</Text>
           <Text style={styles.quoteAuthor}>— {quote.author}</Text>
         </>
       ) : null}
-      <TouchableOpacity
-        style={styles.quoteBtn}
-        onPress={fetchQuote}
-        disabled={quoteLoading}
-        accessibilityRole="button"
-        accessibilityLabel="Get new quote"
-      >
-        <Text style={styles.quoteBtnText}>New Quote</Text>
-      </TouchableOpacity>
     </View>
   );
 }

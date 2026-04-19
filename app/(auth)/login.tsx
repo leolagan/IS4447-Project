@@ -14,16 +14,17 @@ function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     flex:       { flex: 1, backgroundColor: c.background },
     scroll:     { flex: 1 },
-    container:  { padding: 24, paddingTop: 80, paddingBottom: 40 },
+    container:  { padding: 24, paddingTop: 96, paddingBottom: 40 },
     header:     { alignItems: 'center', marginBottom: 32 },
-    logo:       { width: 64, height: 64, borderRadius: 16, marginBottom: 8 },
-    brand:      { fontSize: 22, fontWeight: 'bold', color: c.primary },
-    title:      { fontSize: 28, fontWeight: 'bold', color: c.text, marginBottom: 4 },
-    subtitle:   { fontSize: 15, color: c.subtext, marginBottom: 28 },
+    logo:       { width: 72, height: 72, borderRadius: 20, marginBottom: 10 },
+    brand:      { fontSize: 13, fontWeight: 'bold', color: c.primary, letterSpacing: 2, textTransform: 'uppercase' },
+    title:      { fontSize: 30, fontWeight: 'bold', fontFamily: 'Sora_700Bold', color: c.text, marginBottom: 6 },
+    subtitle:   { fontSize: 15, color: c.subtext, marginBottom: 32 },
+    divider:    { height: 1, backgroundColor: c.border, marginBottom: 24 },
     error:      { color: c.danger, fontSize: 14, marginBottom: 12 },
-    switchRow:  { alignItems: 'center', marginTop: 20 },
-    switchText: { fontSize: 14, color: c.subtext },
-    switchLink: { color: c.primary, fontWeight: '600' },
+    switchRow:  { alignItems: 'center', marginTop: 28 },
+    switchText: { fontSize: 14, color: c.subtext, fontFamily: 'Sora_400Regular' },
+    switchLink: { color: c.primary, fontWeight: '600', fontFamily: 'Sora_600SemiBold' },
   });
 }
 
@@ -77,6 +78,7 @@ export default function LoginScreen() {
 
         <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.subtitle}>Log in to continue</Text>
+        <View style={styles.divider} />
 
         <FormField
           label="Username"

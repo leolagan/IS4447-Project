@@ -18,17 +18,17 @@ function getGoalPlaceholder(unit: string, metricType: string): string {
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     scroll:           { flex: 1, backgroundColor: c.background },
-    container:        { padding: 16, paddingTop: 60, paddingBottom: 40 },
-    title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
-    label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: c.text },
-    toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 8, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
-    toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: c.card },
+    container:        { padding: 16, paddingTop: 56, paddingBottom: 40 },
+    title:            { fontSize: 30, fontWeight: 'bold', fontFamily: 'Sora_700Bold', marginBottom: 28, color: c.text },
+    label:            { fontSize: 14, fontWeight: '600', fontFamily: 'Sora_600SemiBold', marginBottom: 8, color: c.text },
+    toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 12, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
+    toggleBtn:        { flex: 1, paddingVertical: 14, paddingHorizontal: 12, alignItems: 'center', backgroundColor: c.card },
     toggleActive:     { backgroundColor: c.primary },
-    toggleText:       { fontSize: 14, fontWeight: '500', color: c.text },
+    toggleText:       { fontSize: 14, fontWeight: '500', fontFamily: 'Sora_400Regular', color: c.text },
     toggleTextActive: { color: '#fff' },
     timeRow:          { flexDirection: 'row', gap: 12, marginBottom: 16 },
     timeField:        { flex: 1 },
-    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 15, padding: 16, marginTop: 8, fontFamily: 'Sora_400Regular' },
   });
 }
 
@@ -210,7 +210,7 @@ export default function EditTargetScreen() {
         </TouchableOpacity>
       </View>
 
-      <PrimaryButton title="Save Changes" onPress={handleSave} variant="edit" />
+      <PrimaryButton title="Save Changes" onPress={handleSave} variant="primary" />
 
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.cancel}>Cancel</Text>

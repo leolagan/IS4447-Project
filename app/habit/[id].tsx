@@ -5,6 +5,7 @@ import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate } from '@/utils/dateHelpers';
 import { formatUnit, formatValue as sharedFormatValue } from '@/utils/formatters';
+import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -15,51 +16,48 @@ function makeStyles(c: typeof AppColours) {
     container:     { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
     header:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
     back:          { fontSize: 18, color: c.primary, fontWeight: '500' },
-    editHabitBtn:  { backgroundColor: c.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-    editHabitText: { color: c.edit, fontWeight: '600', fontSize: 14 },
+    editHabitBtn:  { padding: 6 },
     habitCard: {
       backgroundColor: c.card,
-      borderRadius: 14,
-      padding: 16,
+      borderRadius: 16,
+      padding: 20,
       marginBottom: 24,
-      borderLeftWidth: 5,
+      borderLeftWidth: 6,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
     },
-    habitName:    { fontSize: 22, fontWeight: 'bold', color: c.text },
+    habitName:    { fontSize: 24, fontWeight: 'bold', fontFamily: 'Sora_700Bold', color: c.text },
     tagRow:       { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
     tag:          { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
-    tagText:      { fontSize: 12, fontWeight: '600' },
-    unit:         { fontSize: 13, color: c.subtext },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: c.text, marginBottom: 12 },
+    tagText:      { fontSize: 12, fontWeight: '600', fontFamily: 'Sora_600SemiBold' },
+    unit:         { fontSize: 13, color: c.subtext, fontFamily: 'Sora_400Regular' },
+    sectionTitle: { fontSize: 18, fontWeight: '700', fontFamily: 'Sora_700Bold', color: c.text, marginBottom: 16 },
     logCard: {
       backgroundColor: c.card,
-      borderRadius: 14,
-      padding: 16,
+      borderRadius: 16,
+      padding: 18,
       marginBottom: 10,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
       borderLeftWidth: 4,
       borderLeftColor: c.border,
     },
     logLeft:       { flex: 1 },
-    logDate:       { fontSize: 12, color: c.subtext, marginBottom: 2 },
-    logValue:      { fontSize: 17, fontWeight: '700', color: c.text },
-    logNotes:      { fontSize: 12, color: c.subtext, marginTop: 4 },
+    logDate:       { fontSize: 12, color: c.subtext, marginBottom: 2, fontFamily: 'Sora_400Regular' },
+    logValue:      { fontSize: 17, fontWeight: '700', fontFamily: 'Sora_600SemiBold', color: c.text },
+    logNotes:      { fontSize: 12, color: c.subtext, marginTop: 4, fontFamily: 'Sora_400Regular' },
     logActions:    { flexDirection: 'row', gap: 6, marginLeft: 12 },
-    editBtn:       { backgroundColor: c.editLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-    editBtnText:   { color: c.edit, fontWeight: '600', fontSize: 13 },
-    deleteBtn:     { backgroundColor: c.dangerLight, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-    deleteBtnText: { color: c.danger, fontWeight: '600', fontSize: 13 },
+    editBtn:   { backgroundColor: c.editLight, padding: 10, borderRadius: 10 },
+    deleteBtn: { backgroundColor: c.dangerLight, padding: 10, borderRadius: 10 },
     emptyContainer:{ alignItems: 'center', marginTop: 60 },
     empty:         { fontSize: 15, color: c.subtext },
     fab: {
@@ -126,8 +124,10 @@ export default function HabitDetailScreen() {
         <TouchableOpacity
           style={styles.editHabitBtn}
           onPress={() => router.push(`/habit/edit/${habitId}`)}
+          accessibilityRole="button"
+          accessibilityLabel="Edit habit"
         >
-          <Text style={styles.editHabitText}>Edit Habit</Text>
+          <Feather name="edit-2" size={20} color={colours.edit} />
         </TouchableOpacity>
       </View>
 
@@ -165,7 +165,7 @@ export default function HabitDetailScreen() {
                   accessibilityLabel="Edit log"
                   hitSlop={{ top: 8, bottom: 8 }}
                 >
-                  <Text style={styles.editBtnText}>Edit</Text>
+                  <Feather name="edit-2" size={15} color={colours.edit} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteBtn}
@@ -174,7 +174,7 @@ export default function HabitDetailScreen() {
                   accessibilityLabel="Delete log"
                   hitSlop={{ top: 8, bottom: 8 }}
                 >
-                  <Text style={styles.deleteBtnText}>Delete</Text>
+                  <Feather name="trash-2" size={15} color={colours.danger} />
                 </TouchableOpacity>
               </View>
             </View>

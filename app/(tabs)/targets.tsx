@@ -8,10 +8,10 @@ import { useMemo } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-function getBarColour(item: TargetWithProgress): string {
-  if (item.isExceeded) return '#FA5252';
-  if (item.isMet) return '#51CF66';
-  return '#1C8DB3';
+function getBarColour(item: TargetWithProgress, c: typeof AppColours): string {
+  if (item.isExceeded) return c.danger;
+  if (item.isMet)      return c.success;
+  return c.primary;
 }
 
 function getStatusChipStyles(item: TargetWithProgress, styles: ReturnType<typeof makeStyles>) {
@@ -32,46 +32,46 @@ function getStatusLabel(item: TargetWithProgress): string {
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
-    container:         { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    container:         { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 20 },
     centered:          { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
     errorText:         { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-    title:             { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 20 },
+    title:             { fontSize: 30, fontWeight: 'bold', fontFamily: 'Sora_700Bold', color: c.text, marginBottom: 20 },
     card: {
       backgroundColor: c.card,
-      borderRadius: 14,
+      borderRadius: 16,
       marginBottom: 12,
       flexDirection: 'row',
       alignItems: 'stretch',
       overflow: 'hidden',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
     },
     categoryBar:       { width: 5 },
-    cardBody:          { flex: 1, padding: 16 },
+    cardBody:          { flex: 1, padding: 20 },
     headerRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-    habitName:         { fontSize: 16, fontWeight: '600', color: c.text, flex: 1, marginRight: 8 },
-    typeBadge:         { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-    weeklyBadge:       { backgroundColor: '#E7F5FF' },
-    monthlyBadge:      { backgroundColor: '#F3D9FA' },
+    habitName:         { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text, flex: 1, marginRight: 8 },
+    typeBadge:         { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+    weeklyBadge:       { backgroundColor: c.primaryLight },
+    monthlyBadge:      { backgroundColor: c.editLight },
     typeBadgeText:     { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
     directionText:     { fontSize: 13, color: c.subtext, marginBottom: 10 },
-    progressTrack:     { height: 8, backgroundColor: c.border, borderRadius: 4, overflow: 'hidden', marginBottom: 10 },
+    progressTrack:     { height: 10, backgroundColor: c.border, borderRadius: 5, overflow: 'hidden', marginBottom: 10 },
     bottomRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     progressText:      { fontSize: 13, color: c.text, fontWeight: '500' },
-    statusChip:        { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
-    statusMet:         { backgroundColor: '#EBFBEE' },
-    statusExceeded:    { backgroundColor: '#FFF0F0' },
+    statusChip:        { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+    statusMet:         { backgroundColor: c.primaryLight },
+    statusExceeded:    { backgroundColor: c.dangerLight },
     statusPending:     { backgroundColor: c.background },
     statusText:        { fontSize: 12, fontWeight: '600' },
-    statusMetText:     { color: '#2F9E44' },
-    statusExceededText:{ color: '#FA5252' },
+    statusMetText:     { color: c.success },
+    statusExceededText:{ color: c.danger },
     statusPendingText: { color: c.subtext },
     emptyContainer:    { alignItems: 'center', marginTop: 80 },
-    emptyIcon:         { fontSize: 48, marginBottom: 12 },
-    empty:             { fontSize: 15, color: c.subtext },
+    empty:             { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text },
+    emptyHint:         { fontSize: 13, color: c.subtext, marginTop: 8, textAlign: 'center', fontFamily: 'Sora_400Regular', paddingHorizontal: 32 },
     fab: {
       position: 'absolute', bottom: 32, right: 24,
       backgroundColor: c.primary,
@@ -138,7 +138,7 @@ export default function TargetsScreen() {
         renderItem={({ item, index }) => {
           const catColour = getCategoryColour(item.habitCategoryId);
           const fillPct   = Math.min(item.progress / item.goal, 1);
-          const barColour = getBarColour(item);
+          const barColour = getBarColour(item, colours);
 
           return (
             <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
@@ -161,7 +161,7 @@ export default function TargetsScreen() {
                     ]}>
                       <Text style={[
                         styles.typeBadgeText,
-                        { color: item.type === 'weekly' ? '#1971C2' : '#862E9C' },
+                        { color: colours.primary },
                       ]}>
                         {item.type === 'weekly' ? 'WEEKLY' : 'MONTHLY'}
                       </Text>
@@ -172,8 +172,8 @@ export default function TargetsScreen() {
 
                   <View style={styles.progressTrack}>
                     <View style={{
-                      height: 8,
-                      borderRadius: 4,
+                      height: 10,
+                      borderRadius: 5,
                       width: `${Math.round(fillPct * 100)}%`,
                       backgroundColor: barColour,
                     }} />
@@ -198,7 +198,8 @@ export default function TargetsScreen() {
         }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.empty}>No targets yet. Tap + to add one.</Text>
+            <Text style={styles.empty}>No targets yet.</Text>
+            <Text style={styles.emptyHint}>Tap + to set a weekly or monthly goal for any habit.</Text>
           </View>
         }
       />

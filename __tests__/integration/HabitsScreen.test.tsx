@@ -25,11 +25,12 @@ jest.mock('@/hooks/useLogs', () => ({
 jest.mock('@/context/ThemeContext', () => ({
   useTheme: () => ({
     colours: {
-      primary: '#1C8DB3', primaryLight: '#E7F5FF',
-      background: '#F8F9FA', card: '#FFFFFF',
-      text: '#212529', subtext: '#868E96',
-      border: '#DEE2E6', danger: '#FA5252',
-      dangerLight: '#FFF5F5', edit: '#2AA7C9', editLight: '#E3F9FF',
+      primary: '#10C9A0', primaryLight: '#DCF9F1',
+      background: '#F5F8F7', card: '#FFFFFF',
+      text: '#0D1F19', subtext: '#6B8C83',
+      border: '#DDE9E5', danger: '#F0524A',
+      dangerLight: '#FEE9E8', edit: '#7C5CFC', editLight: '#EDE9FF',
+      success: '#20C164',
     },
   }),
 }));

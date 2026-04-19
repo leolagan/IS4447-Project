@@ -8,6 +8,19 @@ function daysAgo(n: number): string {
   return d.toISOString().split('T')[0];
 }
 
+export async function forceSeed() {
+  const existing = await db.select().from(users).where(eq(users.username, 'Demo'));
+  if (existing.length > 0) {
+    const userId = existing[0].id;
+    await db.delete(targets).where(eq(targets.userId, userId));
+    await db.delete(habitLogs).where(eq(habitLogs.userId, userId));
+    await db.delete(habits).where(eq(habits.userId, userId));
+    await db.delete(categories).where(eq(categories.userId, userId));
+    await db.delete(users).where(eq(users.id, userId));
+  }
+  await seedIfEmpty();
+}
+
 export async function seedIfEmpty() {
   const existing = await db.select().from(users).where(eq(users.username, 'Demo'));
   if (existing.length > 0) return;
@@ -19,10 +32,16 @@ export async function seedIfEmpty() {
   const userId = inserted[0].id;
 
   await db.insert(categories).values([
-    { userId, name: 'Fitness',   color: '#FF6B6B' },
-    { userId, name: 'Nutrition', color: '#51CF66' },
-    { userId, name: 'Wellness',  color: '#845EF7' },
-    { userId, name: 'Recovery',  color: '#339AF0' },
+    { userId, name: 'Fitness',       color: '#FF6B6B' },
+    { userId, name: 'Nutrition',     color: '#51CF66' },
+    { userId, name: 'Wellness',      color: '#845EF7' },
+    { userId, name: 'Recovery',      color: '#339AF0' },
+    { userId, name: 'Health',        color: '#FF922B' },
+    { userId, name: 'Mindfulness',   color: '#20C997' },
+    { userId, name: 'Learning',      color: '#4DABF7' },
+    { userId, name: 'Sleep',         color: '#748FFC' },
+    { userId, name: 'Productivity',  color: '#FCC419' },
+    { userId, name: 'Social',        color: '#F06595' },
   ]);
 
   const cats      = await db.select().from(categories).where(eq(categories.userId, userId));

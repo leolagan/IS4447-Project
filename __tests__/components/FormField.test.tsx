@@ -5,8 +5,8 @@ import FormField from '@/components/ui/FormField';
 jest.mock('@/context/ThemeContext', () => ({
   useTheme: () => ({
     colours: {
-      text: '#212529', subtext: '#868E96', border: '#DEE2E6',
-      card: '#FFFFFF', background: '#F8F9FA',
+      text: '#0D1F19', subtext: '#6B8C83', border: '#DDE9E5',
+      card: '#FFFFFF', background: '#F5F8F7',
     },
   }),
 }));

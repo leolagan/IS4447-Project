@@ -3,6 +3,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { habits } from '@/db/schema';
 import { useCategories } from '@/hooks/useCategories';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -10,32 +11,37 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
-    container:      { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
+    container:      { flex: 1, backgroundColor: c.background },
+    header:         { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 16, gap: 12 },
+    backBtn:        { padding: 4 },
+    title:          { fontSize: 28, fontWeight: 'bold', fontFamily: 'Sora_700Bold', color: c.text, flex: 1 },
     centered:       { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
     errorText:      { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-    title:          { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 20 },
+    list:           { paddingHorizontal: 16, paddingBottom: 100 },
     card: {
       backgroundColor: c.card,
-      borderRadius: 14,
+      borderRadius: 16,
       marginBottom: 12,
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 16,
+      padding: 18,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
       gap: 14,
     },
-    swatch:         { width: 28, height: 28, borderRadius: 14 },
+    swatch:         { width: 32, height: 32, borderRadius: 16 },
     cardBody:       { flex: 1 },
-    name:           { fontSize: 16, fontWeight: '600', color: c.text },
-    count:          { fontSize: 13, color: c.subtext, marginTop: 2 },
-    editBtn:        { backgroundColor: c.editLight, paddingHorizontal: 14, paddingVertical: 11, borderRadius: 8 },
-    editBtnText:    { color: c.edit, fontWeight: '600', fontSize: 13 },
+    name:           { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text },
+    count:          { fontSize: 13, color: c.subtext, marginTop: 2, fontFamily: 'Sora_400Regular' },
+    actions:        { flexDirection: 'row', gap: 8 },
+    iconBtn:        { padding: 10, borderRadius: 10 },
+    editIconBtn:    { backgroundColor: c.editLight },
+    deleteIconBtn:  { backgroundColor: c.dangerLight },
     emptyContainer: { alignItems: 'center', marginTop: 80 },
-    empty:          { fontSize: 15, color: c.subtext },
+    empty:          { fontSize: 15, color: c.subtext, fontFamily: 'Sora_400Regular' },
     fab: {
       position: 'absolute',
       bottom: 32,
@@ -83,9 +89,7 @@ export default function CategoriesScreen() {
         style: 'destructive',
         onPress: async () => {
           const err = await deleteCategory(id);
-          if (err) {
-            Alert.alert('Cannot Delete', err);
-          }
+          if (err) Alert.alert('Cannot Delete', err);
         },
       },
     ]);
@@ -109,41 +113,53 @@ export default function CategoriesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Categories</Text>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="chevron-back" size={26} color={colours.primary} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Categories</Text>
+      </View>
 
       <FlatList
         data={categories}
         keyExtractor={item => item.id.toString()}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.list}
         renderItem={({ item, index }) => {
           const count = habitCounts[item.id] ?? 0;
           return (
             <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
-              <TouchableOpacity
-                style={styles.card}
-                onLongPress={() => confirmDelete(item.id, item.name)}
-                activeOpacity={0.75}
-                accessibilityRole="button"
-                accessibilityLabel={`${item.name} category`}
-                accessibilityHint="Long press to delete"
-              >
+              <View style={styles.card}>
                 <View style={[styles.swatch, { backgroundColor: item.color }]} />
                 <View style={styles.cardBody}>
                   <Text style={styles.name}>{item.name}</Text>
-                  <Text style={styles.count}>
-                    {count} habit{count !== 1 ? 's' : ''}
-                  </Text>
+                  <Text style={styles.count}>{count} habit{count !== 1 ? 's' : ''}</Text>
                 </View>
-                <TouchableOpacity
-                  style={styles.editBtn}
-                  onPress={() => router.push(`/category/edit/${item.id}`)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Edit ${item.name} category`}
-                >
-                  <Text style={styles.editBtnText}>Edit</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    style={[styles.iconBtn, styles.editIconBtn]}
+                    onPress={() => router.push(`/category/edit/${item.id}`)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Edit ${item.name} category`}
+                  >
+                    <Feather name="edit-2" size={16} color={colours.edit} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.iconBtn, styles.deleteIconBtn]}
+                    onPress={() => confirmDelete(item.id, item.name)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete ${item.name} category`}
+                  >
+                    <Feather name="trash-2" size={16} color={colours.danger} />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </Animated.View>
           );
         }}

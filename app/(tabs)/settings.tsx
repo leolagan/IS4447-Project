@@ -1,0 +1,250 @@
+import { AppColours } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { db } from '@/db/client';
+import { forceSeed } from '@/db/seed';
+import { users } from '@/db/schema';
+import { useHabits } from '@/hooks/useHabits';
+import { useLogs } from '@/hooks/useLogs';
+import { buildCsv } from '@/utils/csvHelpers';
+import { Ionicons } from '@expo/vector-icons';
+import { eq } from 'drizzle-orm';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Notifications from 'expo-notifications';
+import { useRouter } from 'expo-router';
+import * as Sharing from 'expo-sharing';
+import { useMemo, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+function makeStyles(c: typeof AppColours) {
+  return StyleSheet.create({
+    container:        { flex: 1, backgroundColor: c.background },
+    content:          { padding: 16, paddingBottom: 48 },
+
+    avatar:           { width: 80, height: 80, borderRadius: 40, backgroundColor: c.primary, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginTop: 16, marginBottom: 8 },
+    avatarText:       { fontSize: 30, fontWeight: '700', fontFamily: 'Sora_700Bold', color: '#fff' },
+    username:         { fontSize: 20, fontWeight: '700', fontFamily: 'Sora_700Bold', color: c.text, textAlign: 'center', marginBottom: 28 },
+
+    sectionLabel:     { fontSize: 11, fontWeight: '700', fontFamily: 'Sora_600SemiBold', color: c.subtext, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8, marginTop: 24 },
+
+    card:             { backgroundColor: c.card, borderRadius: 16, marginBottom: 16, overflow: 'hidden', borderWidth: 1, borderColor: c.border },
+    row:              { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
+    rowLabel:         { flex: 1, fontSize: 15, fontWeight: '500', fontFamily: 'Sora_400Regular', color: c.text },
+
+    toggle:           { flexDirection: 'row', borderRadius: 10, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
+    toggleBtn:        { flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: c.card },
+    toggleActive:     { backgroundColor: c.primary },
+    toggleText:       { fontSize: 14, fontWeight: '500', fontFamily: 'Sora_400Regular', color: c.text },
+    toggleTextActive: { color: '#fff' },
+
+    actionBtn:        { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10, backgroundColor: c.primaryLight },
+    actionBtnText:    { fontSize: 13, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.primary },
+    confirmText:      { fontSize: 13, color: c.primary, textAlign: 'center', paddingBottom: 12, fontFamily: 'Sora_400Regular' },
+
+    dangerBtn:        { margin: 16, marginTop: 0, backgroundColor: c.dangerLight, borderRadius: 14, padding: 16, alignItems: 'center' },
+    dangerBtnText:    { fontSize: 15, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.danger },
+    logoutBtn:        { margin: 16, marginBottom: 8, backgroundColor: c.primaryLight, borderRadius: 14, padding: 16, alignItems: 'center' },
+    logoutBtnText:    { fontSize: 15, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.primary },
+  });
+}
+
+export default function SettingsScreen() {
+  const { user, setUser } = useAuth();
+  const { isDark, toggleTheme, colours } = useTheme();
+  const router = useRouter();
+  const styles = useMemo(() => makeStyles(colours), [colours]);
+  const { habits } = useHabits();
+  const { logs } = useLogs();
+
+  const [reminderSet, setReminderSet] = useState(false);
+
+  const initials = (user?.username ?? '?').charAt(0).toUpperCase();
+
+  async function handleSetReminder() {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'Default',
+        importance: Notifications.AndroidImportance.HIGH,
+      });
+    }
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Please enable notifications in your device settings.');
+      return;
+    }
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'HabitFlow Reminder',
+        body: "Don't forget to log your habits today!",
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 10 },
+    });
+    setReminderSet(true);
+  }
+
+  async function handleExport() {
+    const habitMap = Object.fromEntries(habits.map(h => [h.id, h.name]));
+    const csv = buildCsv(logs, habitMap);
+    const uri = FileSystem.documentDirectory + 'habitflow-export.csv';
+    await FileSystem.writeAsStringAsync(uri, csv, { encoding: 'utf8' });
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, { mimeType: 'text/csv', dialogTitle: 'Export Habit Data' });
+    } else {
+      Alert.alert('Exported', `File saved to:\n${uri}`);
+    }
+  }
+
+  async function handleForceSeed() {
+    await forceSeed();
+    Alert.alert('Seed complete!', 'Log in with username: Demo, password: demo123');
+  }
+
+  function handleLogout() {
+    setUser(null);
+    router.replace('/(auth)/login');
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            if (user) await db.delete(users).where(eq(users.id, user.id));
+            setUser(null);
+            router.replace('/(auth)/login');
+          },
+        },
+      ]
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{initials}</Text>
+      </View>
+      <Text style={styles.username}>{user?.username}</Text>
+
+      <Text style={styles.sectionLabel}>Theme</Text>
+      <View style={styles.card}>
+        <View style={[styles.row, { paddingBottom: 12 }]}>
+          <Ionicons name="contrast-outline" size={20} color={colours.subtext} />
+          <View style={[styles.toggle, { flex: 1 }]}>
+            <TouchableOpacity
+              style={[styles.toggleBtn, !isDark && styles.toggleActive]}
+              onPress={() => isDark && toggleTheme()}
+              activeOpacity={!isDark ? 1 : 0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Light mode"
+              accessibilityState={{ selected: !isDark }}
+            >
+              <Text style={[styles.toggleText, !isDark && styles.toggleTextActive]}>Light</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, isDark && styles.toggleActive]}
+              onPress={() => !isDark && toggleTheme()}
+              activeOpacity={isDark ? 1 : 0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Dark mode"
+              accessibilityState={{ selected: isDark }}
+            >
+              <Text style={[styles.toggleText, isDark && styles.toggleTextActive]}>Dark</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      <Text style={styles.sectionLabel}>Notifications</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Ionicons name="notifications-outline" size={20} color={colours.subtext} />
+          <Text style={styles.rowLabel}>Daily Reminder</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={handleSetReminder}
+            accessibilityRole="button"
+            accessibilityLabel="Set daily reminder"
+          >
+            <Text style={styles.actionBtnText}>Set Reminder</Text>
+          </TouchableOpacity>
+        </View>
+        {reminderSet && (
+          <Text style={styles.confirmText}>Reminder set — notification in ~10 seconds</Text>
+        )}
+      </View>
+
+      <Text style={styles.sectionLabel}>App</Text>
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => router.push('/categories')}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Manage categories"
+        >
+          <Ionicons name="pricetag-outline" size={20} color={colours.subtext} />
+          <Text style={styles.rowLabel}>Manage Categories</Text>
+          <Ionicons name="chevron-forward" size={18} color={colours.subtext} />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.sectionLabel}>Data</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Ionicons name="download-outline" size={20} color={colours.subtext} />
+          <Text style={styles.rowLabel}>Export CSV</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={handleExport}
+            accessibilityRole="button"
+            accessibilityLabel="Export data as CSV"
+          >
+            <Text style={styles.actionBtnText}>Export</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <Text style={styles.sectionLabel}>Developer</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Ionicons name="code-slash-outline" size={20} color={colours.subtext} />
+          <Text style={styles.rowLabel}>Run Seed Script</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={handleForceSeed}
+            accessibilityRole="button"
+            accessibilityLabel="Run seed script"
+          >
+            <Text style={styles.actionBtnText}>Run Seed</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <Text style={styles.sectionLabel}>Account</Text>
+      <TouchableOpacity
+        style={styles.logoutBtn}
+        onPress={handleLogout}
+        accessibilityRole="button"
+        accessibilityLabel="Log out"
+      >
+        <Text style={styles.logoutBtnText}>Log Out</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.dangerBtn}
+        onPress={handleDeleteAccount}
+        accessibilityRole="button"
+        accessibilityLabel="Delete account"
+      >
+        <Text style={styles.dangerBtnText}>Delete Account</Text>
+      </TouchableOpacity>
+
+    </ScrollView>
+  );
+}

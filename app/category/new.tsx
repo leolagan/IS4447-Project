@@ -8,18 +8,18 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
-const DEFAULT_COLOUR = '#1C8DB3';
+const DEFAULT_COLOUR = '#10C9A0';
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
-    container:    { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
-    title:        { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
+    container:    { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 56 },
+    title:        { fontSize: 30, fontWeight: 'bold', fontFamily: 'Sora_700Bold', marginBottom: 28, color: c.text },
     preview: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: c.card,
-      borderRadius: 12,
-      padding: 14,
+      borderRadius: 16,
+      padding: 16,
       marginBottom: 24,
       gap: 12,
       shadowColor: '#000',
@@ -28,9 +28,9 @@ function makeStyles(c: typeof AppColours) {
       shadowRadius: 4,
       elevation: 2,
     },
-    previewSwatch: { width: 28, height: 28, borderRadius: 14 },
-    previewName:   { fontSize: 16, fontWeight: '600', color: c.text },
-    cancel:        { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+    previewSwatch: { width: 32, height: 32, borderRadius: 16 },
+    previewName:   { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text },
+    cancel:        { textAlign: 'center', color: c.subtext, fontSize: 15, padding: 16, marginTop: 8, fontFamily: 'Sora_400Regular' },
   });
 }
 

@@ -9,25 +9,28 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+const PRESET_UNIT_VALUES = new Set(['km','hrs/mins','grams']);
+
 const UNIT_OPTIONS = [
   { label: 'km', value: 'km' },
+  { label: 'hours/mins', value: 'hrs/mins' },
   { label: 'grams', value: 'grams' },
-  { label: 'hrs/mins', value: 'hrs/mins' },
-  { label: 'calories', value: 'calories' },
+  { label: '+ Custom unit…', value: '__custom__' },
 ];
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     scroll:           { flex: 1, backgroundColor: c.background },
-    container:        { padding: 16, paddingTop: 60, paddingBottom: 40 },
-    title:            { fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: c.text },
-    label:            { fontSize: 14, fontWeight: '600', marginBottom: 8, color: c.text },
-    toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 8, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
-    toggleBtn:        { flex: 1, padding: 12, alignItems: 'center', backgroundColor: c.card },
+    container:        { padding: 16, paddingTop: 56, paddingBottom: 40 },
+    title:            { fontSize: 30, fontWeight: 'bold', fontFamily: 'Sora_700Bold', marginBottom: 28, color: c.text },
+    label:            { fontSize: 14, fontWeight: '600', fontFamily: 'Sora_600SemiBold', marginBottom: 8, color: c.text },
+    toggle:           { flexDirection: 'row', marginBottom: 16, borderRadius: 12, borderWidth: 1, borderColor: c.border, overflow: 'hidden' },
+    toggleBtn:        { flex: 1, paddingVertical: 14, paddingHorizontal: 12, alignItems: 'center', backgroundColor: c.card },
     toggleActive:     { backgroundColor: c.primary },
-    toggleText:       { fontSize: 14, fontWeight: '500', color: c.text },
+    toggleText:       { fontSize: 14, fontWeight: '500', fontFamily: 'Sora_400Regular', color: c.text },
     toggleTextActive: { color: '#fff' },
-    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 16, padding: 16 },
+    cancel:           { textAlign: 'center', color: c.subtext, fontSize: 15, padding: 16, marginTop: 8, fontFamily: 'Sora_400Regular' },
+    usePreset:        { fontSize: 13, color: c.primary, fontFamily: 'Sora_400Regular', marginTop: 4, marginBottom: 16 },
   });
 }
 
@@ -41,6 +44,8 @@ export default function EditHabitScreen() {
 
   const [name, setName] = useState('');
   const [unit, setUnit] = useState<string | null>(null);
+  const [customUnit, setCustomUnit] = useState('');
+  const [isCustomUnit, setIsCustomUnit] = useState(false);
   const [metricType, setMetricType] = useState<'count' | 'boolean'>('count');
   const [categoryId, setCategoryId] = useState<number | null>(null);
 
@@ -48,7 +53,12 @@ export default function EditHabitScreen() {
     const habit = habits.find(h => h.id === Number(id));
     if (habit) {
       setName(habit.name);
-      setUnit(habit.unit);
+      if (habit.unit && !PRESET_UNIT_VALUES.has(habit.unit)) {
+        setIsCustomUnit(true);
+        setCustomUnit(habit.unit);
+      } else {
+        setUnit(habit.unit);
+      }
       setMetricType(habit.metricType as 'count' | 'boolean');
       setCategoryId(habit.categoryId);
     }
@@ -69,7 +79,12 @@ export default function EditHabitScreen() {
       Alert.alert('Error', 'Please select a category.');
       return;
     }
-    await updateHabit(Number(id), name.trim(), metricType, unit ?? 'times', categoryId);
+    const finalUnit = isCustomUnit ? customUnit.trim() : (unit ?? 'times');
+    if (metricType === 'count' && !finalUnit) {
+      Alert.alert('Error', 'Please enter a unit name.');
+      return;
+    }
+    await updateHabit(Number(id), name.trim(), metricType, finalUnit || 'times', categoryId);
     router.back();
   }
 
@@ -109,13 +124,34 @@ export default function EditHabitScreen() {
       </View>
 
       {metricType === 'count' && (
-        <DropdownPicker
-          label="Unit"
-          options={UNIT_OPTIONS}
-          selected={unit}
-          placeholder="Select a unit..."
-          onSelect={setUnit}
-        />
+        isCustomUnit ? (
+          <>
+            <FormField
+              label="Custom Unit"
+              placeholder="e.g. push-ups, glasses, sessions…"
+              value={customUnit}
+              onChangeText={setCustomUnit}
+            />
+            <TouchableOpacity onPress={() => { setIsCustomUnit(false); setCustomUnit(''); }}>
+              <Text style={styles.usePreset}>Use a preset unit instead</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <DropdownPicker
+            label="Unit"
+            options={UNIT_OPTIONS}
+            selected={unit}
+            placeholder="Select a unit..."
+            onSelect={v => {
+              if (v === '__custom__') {
+                setIsCustomUnit(true);
+                setUnit(null);
+              } else {
+                setUnit(v);
+              }
+            }}
+          />
+        )
       )}
 
       <DropdownPicker
@@ -126,7 +162,7 @@ export default function EditHabitScreen() {
         onSelect={value => setCategoryId(Number(value))}
       />
 
-      <PrimaryButton title="Save Changes" onPress={handleSave} variant="edit" />
+      <PrimaryButton title="Save Changes" onPress={handleSave} variant="primary" />
 
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.cancel}>Cancel</Text>

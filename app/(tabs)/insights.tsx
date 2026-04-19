@@ -1,3 +1,4 @@
+import QuoteCard from '@/components/habits/QuoteCard';
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
@@ -166,16 +167,18 @@ function StatCard({ label, value, colours }: { label: string; value: string; col
     statCard: {
       width: '47.5%',
       backgroundColor: colours.card,
-      borderRadius: 14,
+      borderRadius: 16,
       padding: 16,
+      borderTopWidth: 3,
+      borderTopColor: colours.primary,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
     },
-    statLabel: { fontSize: 12, color: colours.subtext, marginBottom: 6, fontWeight: '500' },
-    statValue: { fontSize: 22, fontWeight: '700', color: colours.text },
+    statLabel: { fontSize: 11, color: colours.subtext, marginBottom: 6, fontWeight: '700', fontFamily: 'Sora_600SemiBold', textTransform: 'uppercase', letterSpacing: 0.8 },
+    statValue: { fontSize: 22, fontWeight: '700', fontFamily: 'Sora_700Bold', color: colours.text },
   }), [colours]);
 
   return (
@@ -193,13 +196,13 @@ function makeStyles(c: typeof AppColours) {
     container: { flex: 1, backgroundColor: c.background },
     centered:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background },
     errorText: { color: c.danger, fontSize: 15, textAlign: 'center', paddingHorizontal: 24 },
-    content:   { padding: 16, paddingTop: 60, paddingBottom: 48 },
-    title:     { fontSize: 30, fontWeight: 'bold', color: c.text, marginBottom: 20 },
+    content:   { padding: 16, paddingTop: 20, paddingBottom: 48 },
+    title:     { fontSize: 30, fontWeight: 'bold', fontFamily: 'Sora_700Bold', color: c.text, marginBottom: 24 },
 
     toggleRow: {
       flexDirection: 'row',
       backgroundColor: c.card,
-      borderRadius: 12,
+      borderRadius: 14,
       padding: 4,
       marginBottom: 20,
       shadowColor: '#000',
@@ -208,41 +211,42 @@ function makeStyles(c: typeof AppColours) {
       shadowRadius: 4,
       elevation: 2,
     },
-    toggleBtn:        { flex: 1, paddingVertical: 12, minHeight: 44, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+    toggleBtn:        { flex: 1, paddingVertical: 10, minHeight: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
     toggleBtnActive:  { backgroundColor: c.primary },
-    toggleText:       { fontSize: 14, fontWeight: '600', color: c.subtext },
+    toggleText:       { fontSize: 14, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.subtext },
     toggleTextActive: { color: '#fff' },
 
     card: {
       backgroundColor: c.card,
-      borderRadius: 14,
-      padding: 16,
+      borderRadius: 16,
+      padding: 20,
       marginBottom: 16,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 3,
     },
-    cardTitle:    { fontSize: 17, fontWeight: '700', color: c.text, marginBottom: 2 },
-    cardSubtitle: { fontSize: 13, color: c.subtext, marginBottom: 16 },
+    cardTitle:    { fontSize: 18, fontWeight: '700', fontFamily: 'Sora_700Bold', color: c.text, marginBottom: 2 },
+    cardSubtitle: { fontSize: 13, color: c.subtext, marginBottom: 16, marginTop: 4 },
 
     noDataBox:  { alignItems: 'center', paddingVertical: 36 },
-    noDataText: { fontSize: 14, color: c.subtext },
+    noDataText: { fontSize: 14, color: c.subtext, fontFamily: 'Sora_400Regular' },
 
     sectionLabel: {
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: '700',
+      fontFamily: 'Sora_600SemiBold',
       color: c.subtext,
-      letterSpacing: 0.8,
+      letterSpacing: 1,
       textTransform: 'uppercase',
       marginBottom: 10,
     },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 
     emptyBox:  { alignItems: 'center', marginTop: 80 },
-    emptyIcon: { fontSize: 48, marginBottom: 12 },
-    emptyText: { fontSize: 15, color: c.subtext, textAlign: 'center', lineHeight: 22 },
+    emptyText: { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text, textAlign: 'center' },
+    emptyHint: { fontSize: 13, color: c.subtext, marginTop: 8, textAlign: 'center', fontFamily: 'Sora_400Regular' },
   });
 }
 
@@ -349,6 +353,8 @@ export default function InsightsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Insights</Text>
 
+      <QuoteCard />
+
       <View style={styles.toggleRow}>
         {(['daily', 'weekly', 'monthly'] as Period[]).map(p => (
           <TouchableOpacity
@@ -369,7 +375,8 @@ export default function InsightsScreen() {
 
       {habits.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>No habits yet.{'\n'}Add some habits to see insights.</Text>
+          <Text style={styles.emptyText}>No habits yet.</Text>
+          <Text style={styles.emptyHint}>Add some habits to start seeing your insights and charts here.</Text>
         </View>
       ) : (
         <>
