@@ -31,14 +31,14 @@ export function useCategories() {
     }, [user?.id])
   );
 
-  async function addCategory(name: string, color: string) {
+  async function addCategory(name: string, color: string, icon: string | null) {
     if (!user) return;
-    await db.insert(categories).values({ userId: user.id, name, color });
+    await db.insert(categories).values({ userId: user.id, name, color, icon });
     load();
   }
 
-  async function updateCategory(id: number, name: string, color: string) {
-    await db.update(categories).set({ name, color }).where(eq(categories.id, id));
+  async function updateCategory(id: number, name: string, color: string, icon: string | null) {
+    await db.update(categories).set({ name, color, icon }).where(eq(categories.id, id));
     load();
   }
 

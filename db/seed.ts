@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { eq } from 'drizzle-orm';
 import { db } from './client';
 import { categories, habitLogs, habits, targets, users } from './schema';
@@ -25,9 +26,11 @@ export async function seedIfEmpty() {
   const existing = await db.select().from(users).where(eq(users.username, 'Demo'));
   if (existing.length > 0) return;
 
+  const hashedPassword = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, 'demo123');
+
   const inserted = await db
     .insert(users)
-    .values({ username: 'Demo', password: 'demo123' })
+    .values({ username: 'Demo', password: hashedPassword })
     .returning();
   const userId = inserted[0].id;
 

@@ -54,6 +54,7 @@ function makeStyles(c: typeof AppColours) {
     headerRow:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
     habitName:         { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text, flex: 1, marginRight: 8 },
     typeBadge:         { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+    dailyBadge:        { backgroundColor: c.success + '30' },
     weeklyBadge:       { backgroundColor: c.primaryLight },
     monthlyBadge:      { backgroundColor: c.editLight },
     typeBadgeText:     { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
@@ -107,7 +108,7 @@ export default function TargetsScreen() {
   function getDirectionLabel(item: TargetWithProgress): string {
     const dirText = item.direction === 'min' ? 'At least' : 'No more than';
     const goalFormatted = formatValue(item.goal, item.habitUnit, item.habitMetricType);
-    const period = item.type === 'weekly' ? 'this week' : 'this month';
+    const period = item.type === 'daily' ? 'today' : item.type === 'weekly' ? 'this week' : 'this month';
     return `${dirText} ${goalFormatted} ${period}`;
   }
 
@@ -157,13 +158,15 @@ export default function TargetsScreen() {
                     <Text style={styles.habitName}>{item.habitName}</Text>
                     <View style={[
                       styles.typeBadge,
-                      item.type === 'weekly' ? styles.weeklyBadge : styles.monthlyBadge,
+                      item.type === 'daily'   ? styles.dailyBadge
+                      : item.type === 'weekly'  ? styles.weeklyBadge
+                      : styles.monthlyBadge,
                     ]}>
                       <Text style={[
                         styles.typeBadgeText,
-                        { color: colours.primary },
+                        { color: item.type === 'daily' ? colours.success : colours.primary },
                       ]}>
-                        {item.type === 'weekly' ? 'WEEKLY' : 'MONTHLY'}
+                        {item.type === 'daily' ? 'DAILY' : item.type === 'weekly' ? 'WEEKLY' : 'MONTHLY'}
                       </Text>
                     </View>
                   </View>

@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { forceSeed } from '@/db/seed';
-import { users } from '@/db/schema';
+import { categories, habitLogs, habits as habitsTable, targets, users } from '@/db/schema';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { buildCsv } from '@/utils/csvHelpers';
@@ -11,10 +11,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { eq } from 'drizzle-orm';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useMemo, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
@@ -43,6 +44,9 @@ function makeStyles(c: typeof AppColours) {
 
     dangerBtn:        { margin: 16, marginTop: 0, backgroundColor: c.dangerLight, borderRadius: 14, padding: 16, alignItems: 'center' },
     dangerBtnText:    { fontSize: 15, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.danger },
+    timeRow:          { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 14, gap: 8 },
+    timeInput:        { width: 52, height: 40, borderRadius: 10, borderWidth: 1, borderColor: c.border, backgroundColor: c.background, textAlign: 'center', fontSize: 16, fontFamily: 'Sora_400Regular', color: c.text },
+    timeSep:          { fontSize: 18, fontWeight: '700', color: c.subtext },
     logoutBtn:        { margin: 16, marginBottom: 8, backgroundColor: c.primaryLight, borderRadius: 14, padding: 16, alignItems: 'center' },
     logoutBtnText:    { fontSize: 15, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.primary },
   });
@@ -56,11 +60,29 @@ export default function SettingsScreen() {
   const { habits } = useHabits();
   const { logs } = useLogs();
 
-  const [reminderSet, setReminderSet] = useState(false);
+  const [reminderHour, setReminderHour]     = useState('08');
+  const [reminderMinute, setReminderMinute] = useState('00');
+  const [reminderConfirm, setReminderConfirm] = useState<string | null>(null);
 
   const initials = (user?.username ?? '?').charAt(0).toUpperCase();
 
+  useEffect(() => {
+    AsyncStorage.getItem('reminderTime').then(saved => {
+      if (saved) {
+        const [h, m] = saved.split(':');
+        setReminderHour(h);
+        setReminderMinute(m);
+        setReminderConfirm(saved);
+      }
+    });
+  }, []);
+
   async function handleSetReminder() {
+    const hour   = Math.min(23, Math.max(0, parseInt(reminderHour,   10) || 0));
+    const minute = Math.min(59, Math.max(0, parseInt(reminderMinute, 10) || 0));
+    const hh = String(hour).padStart(2, '0');
+    const mm = String(minute).padStart(2, '0');
+
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
         name: 'Default',
@@ -78,9 +100,17 @@ export default function SettingsScreen() {
         title: 'HabitFlow Reminder',
         body: "Don't forget to log your habits today!",
       },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 10 },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour,
+        minute,
+      },
     });
-    setReminderSet(true);
+    const timeStr = `${hh}:${mm}`;
+    await AsyncStorage.setItem('reminderTime', timeStr);
+    setReminderHour(hh);
+    setReminderMinute(mm);
+    setReminderConfirm(timeStr);
   }
 
   async function handleExport() {
@@ -115,7 +145,13 @@ export default function SettingsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (user) await db.delete(users).where(eq(users.id, user.id));
+            if (user) {
+              await db.delete(targets).where(eq(targets.userId, user.id));
+              await db.delete(habitLogs).where(eq(habitLogs.userId, user.id));
+              await db.delete(habitsTable).where(eq(habitsTable.userId, user.id));
+              await db.delete(categories).where(eq(categories.userId, user.id));
+              await db.delete(users).where(eq(users.id, user.id));
+            }
             setUser(null);
             router.replace('/(auth)/login');
           },
@@ -166,8 +202,31 @@ export default function SettingsScreen() {
         <View style={styles.row}>
           <Ionicons name="notifications-outline" size={20} color={colours.subtext} />
           <Text style={styles.rowLabel}>Daily Reminder</Text>
+        </View>
+        <View style={styles.timeRow}>
+          <TextInput
+            style={styles.timeInput}
+            value={reminderHour}
+            onChangeText={setReminderHour}
+            keyboardType="number-pad"
+            maxLength={2}
+            accessibilityLabel="Hour"
+            placeholder="HH"
+            placeholderTextColor={colours.subtext}
+          />
+          <Text style={styles.timeSep}>:</Text>
+          <TextInput
+            style={styles.timeInput}
+            value={reminderMinute}
+            onChangeText={setReminderMinute}
+            keyboardType="number-pad"
+            maxLength={2}
+            accessibilityLabel="Minute"
+            placeholder="MM"
+            placeholderTextColor={colours.subtext}
+          />
           <TouchableOpacity
-            style={styles.actionBtn}
+            style={[styles.actionBtn, { marginLeft: 'auto' }]}
             onPress={handleSetReminder}
             accessibilityRole="button"
             accessibilityLabel="Set daily reminder"
@@ -175,8 +234,8 @@ export default function SettingsScreen() {
             <Text style={styles.actionBtnText}>Set Reminder</Text>
           </TouchableOpacity>
         </View>
-        {reminderSet && (
-          <Text style={styles.confirmText}>Reminder set — notification in ~10 seconds</Text>
+        {reminderConfirm && (
+          <Text style={styles.confirmText}>Reminder set for {reminderConfirm} every day</Text>
         )}
       </View>
 

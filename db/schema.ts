@@ -11,6 +11,7 @@ export const categories = sqliteTable('categories', {
   userId: integer('user_id').notNull(),
   name: text('name').notNull(),
   color: text('color').notNull(),
+  icon: text('icon'),
 });
 
 export const habits = sqliteTable('habits', {

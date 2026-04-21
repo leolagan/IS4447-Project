@@ -39,13 +39,18 @@ export function getMonthRange(): { start: string; end: string } {
   };
 }
 
-export function calcStreak(logDates: string[]): number {
+export function calcStreak(logDates: string[], logValues: number[], goal: number): number {
   if (logDates.length === 0) return 0;
+  const threshold = goal > 0 ? goal : 1;
+
+  const qualifyingDates = logDates.filter((_, i) => logValues[i] >= threshold);
+  if (qualifyingDates.length === 0) return 0;
+
   const DAY = 86400000;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const todayTs = today.getTime();
 
-  const unique = [...new Set(logDates)]
+  const unique = [...new Set(qualifyingDates)]
     .map(d => { const dt = new Date(d); dt.setHours(0, 0, 0, 0); return dt.getTime(); })
     .sort((a, b) => b - a);
 

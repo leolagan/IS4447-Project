@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { categories, users } from '@/db/schema';
+import * as Crypto from 'expo-crypto';
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -57,9 +58,11 @@ export default function RegisterScreen() {
       return;
     }
 
+    const hashedPassword = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
+
     const result = await db
       .insert(users)
-      .values({ username: username.trim(), password })
+      .values({ username: username.trim(), password: hashedPassword })
       .returning();
 
     const newUser = result[0];

@@ -32,7 +32,7 @@ function makeStyles(c: typeof AppColours) {
       elevation: 3,
       gap: 14,
     },
-    swatch:         { width: 32, height: 32, borderRadius: 16 },
+    swatch:         { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
     cardBody:       { flex: 1 },
     name:           { fontSize: 16, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.text },
     count:          { fontSize: 13, color: c.subtext, marginTop: 2, fontFamily: 'Sora_400Regular' },
@@ -134,7 +134,11 @@ export default function CategoriesScreen() {
           return (
             <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
               <View style={styles.card}>
-                <View style={[styles.swatch, { backgroundColor: item.color }]} />
+                <View style={[styles.swatch, { backgroundColor: item.color }]}>
+                  {item.icon && (
+                    <Ionicons name={item.icon as any} size={16} color="#fff" />
+                  )}
+                </View>
                 <View style={styles.cardBody}>
                   <Text style={styles.name}>{item.name}</Text>
                   <Text style={styles.count}>{count} habit{count !== 1 ? 's' : ''}</Text>

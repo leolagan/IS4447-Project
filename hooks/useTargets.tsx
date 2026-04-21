@@ -35,6 +35,7 @@ export function useTargets() {
       const allHabits  = await db.select().from(habits).where(eq(habits.userId, user.id));
       const allLogs    = await db.select().from(habitLogs).where(eq(habitLogs.userId, user.id));
 
+      const today = new Date().toISOString().split('T')[0];
       const { start: weekStart,  end: weekEnd  } = getWeekRange();
       const { start: monthStart, end: monthEnd } = getMonthRange();
 
@@ -45,6 +46,7 @@ export function useTargets() {
 
           const relevantLogs = allLogs.filter(log => {
             if (log.habitId !== target.habitId) return false;
+            if (target.type === 'daily')   return log.date === today;
             if (target.type === 'weekly')  return log.date >= weekStart  && log.date <= weekEnd;
             if (target.type === 'monthly') return log.date >= monthStart && log.date <= monthEnd;
             return false;

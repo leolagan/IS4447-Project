@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { users } from '@/db/schema';
+import * as Crypto from 'expo-crypto';
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -48,7 +49,9 @@ export default function LoginScreen() {
     const result = await db.select().from(users).where(eq(users.username, username.trim()));
     const user = result[0];
 
-    if (!user || user.password !== password) {
+    const hashedPassword = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
+
+    if (!user || user.password !== hashedPassword) {
       setError('Incorrect username or password.');
       return;
     }

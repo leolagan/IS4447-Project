@@ -38,7 +38,7 @@ export default function QuoteCard() {
     setQuoteLoading(true);
     setQuoteError(false);
     try {
-      const res  = await fetch('https://zenquotes.io/api/random');
+      const res  = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/random`);
       const data = await res.json();
       setQuote({ content: data[0].q, author: data[0].a });
     } catch {

@@ -16,9 +16,12 @@ sqlite.execSync(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    color TEXT NOT NULL
+    color TEXT NOT NULL,
+    icon TEXT
   );
 `);
+
+try { sqlite.execSync(`ALTER TABLE categories ADD COLUMN icon TEXT`); } catch {}
 
 sqlite.execSync(`
   CREATE TABLE IF NOT EXISTS habits (

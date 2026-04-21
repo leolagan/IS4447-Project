@@ -7,7 +7,7 @@ import { formatDisplayDate } from '@/utils/dateHelpers';
 import { formatUnit, formatValue as sharedFormatValue } from '@/utils/formatters';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -58,6 +58,22 @@ function makeStyles(c: typeof AppColours) {
     logActions:    { flexDirection: 'row', gap: 6, marginLeft: 12 },
     editBtn:   { backgroundColor: c.editLight, padding: 10, borderRadius: 10 },
     deleteBtn: { backgroundColor: c.dangerLight, padding: 10, borderRadius: 10 },
+    rangeRow: {
+      flexDirection: 'row',
+      backgroundColor: c.card,
+      borderRadius: 14,
+      padding: 4,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    rangeBtn:        { flex: 1, paddingVertical: 10, minHeight: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+    rangeBtnActive:  { backgroundColor: c.primary },
+    rangeText:       { fontSize: 13, fontWeight: '600', fontFamily: 'Sora_600SemiBold', color: c.subtext },
+    rangeTextActive: { color: '#fff' },
     emptyContainer:{ alignItems: 'center', marginTop: 60 },
     empty:         { fontSize: 15, color: c.subtext },
     fab: {
@@ -91,8 +107,37 @@ export default function HabitDetailScreen() {
   const { colours } = useTheme();
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
+  type DateRange = 'all' | 'today' | 'week' | 'month';
+  const RANGE_LABELS: { key: DateRange; label: string }[] = [
+    { key: 'all',   label: 'All' },
+    { key: 'today', label: 'Today' },
+    { key: 'week',  label: 'Week' },
+    { key: 'month', label: 'Month' },
+  ];
+
+  const [dateRange, setDateRange] = useState<DateRange>('all');
+
   const habit = habits.find(h => h.id === habitId);
   const category = categories.find(c => c.id === habit?.categoryId);
+
+  const filteredLogs = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const sorted = [...logs].sort((a, b) => b.date.localeCompare(a.date));
+    if (dateRange === 'today') return sorted.filter(l => l.date === today);
+    if (dateRange === 'week') {
+      const from = new Date();
+      from.setDate(from.getDate() - 6);
+      const fromStr = from.toISOString().split('T')[0];
+      return sorted.filter(l => l.date >= fromStr && l.date <= today);
+    }
+    if (dateRange === 'month') {
+      const from = new Date();
+      from.setDate(from.getDate() - 29);
+      const fromStr = from.toISOString().split('T')[0];
+      return sorted.filter(l => l.date >= fromStr && l.date <= today);
+    }
+    return sorted;
+  }, [logs, dateRange]);
 
   function confirmDeleteLog(logId: number) {
     Alert.alert('Delete Log', 'Are you sure you want to delete this log?', [
@@ -145,8 +190,25 @@ export default function HabitDetailScreen() {
 
       <Text style={styles.sectionTitle}>Logs</Text>
 
+      <View style={styles.rangeRow}>
+        {RANGE_LABELS.map(({ key, label }) => (
+          <TouchableOpacity
+            key={key}
+            style={[styles.rangeBtn, dateRange === key && styles.rangeBtnActive]}
+            onPress={() => setDateRange(key)}
+            accessibilityRole="button"
+            accessibilityLabel={`Filter logs: ${label}`}
+            accessibilityState={{ selected: dateRange === key }}
+          >
+            <Text style={[styles.rangeText, dateRange === key && styles.rangeTextActive]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
-        data={[...logs].sort((a, b) => b.date.localeCompare(a.date))}
+        data={filteredLogs}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item, index }) => (

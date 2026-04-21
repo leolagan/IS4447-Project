@@ -7,6 +7,7 @@ import { useTheme } from '@/context/ThemeContext';
 import type { habitLogs, habits } from '@/db/schema';
 import { useCategories } from '@/hooks/useCategories';
 import { useLogs } from '@/hooks/useLogs';
+import { useTargets } from '@/hooks/useTargets';
 import { calcStreak } from '@/utils/dateHelpers';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -99,6 +100,7 @@ export default function HabitsScreen() {
   const { habits, deleteHabit, isLoading, error } = useHabitsContext();
   const { categories }                            = useCategories();
   const { logs, addLog, updateLog, deleteLog }    = useLogs();
+  const { targets }                               = useTargets();
   const { colours } = useTheme();
   const router = useRouter();
   const styles = useMemo(() => makeStyles(colours), [colours]);
@@ -288,8 +290,15 @@ export default function HabitsScreen() {
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item, index }) => {
+          const habitLogEntries = logs.filter(l => l.habitId === item.id);
+          const dailyTarget  = targets.find(t => t.habitId === item.id && t.type === 'daily');
+          const weeklyTarget = targets.find(t => t.habitId === item.id && t.type === 'weekly');
+          const goalThreshold = dailyTarget?.goal
+            ?? (weeklyTarget ? Math.floor(weeklyTarget.goal / 7) : 1);
           const streak = calcStreak(
-            logs.filter(l => l.habitId === item.id && l.value > 0).map(l => l.date)
+            habitLogEntries.map(l => l.date),
+            habitLogEntries.map(l => l.value),
+            goalThreshold
           );
           const existing    = getLog(item.id);
           const isCompleted = !!existing;

@@ -41,7 +41,7 @@ export default function EditTargetScreen() {
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
   const [habitId, setHabitId] = useState<number | null>(null);
-  const [type, setType] = useState<'weekly' | 'monthly'>('weekly');
+  const [type, setType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [goal, setGoal] = useState('');
   const [goalHours, setGoalHours] = useState('');
   const [goalMins, setGoalMins] = useState('');
@@ -57,7 +57,7 @@ export default function EditTargetScreen() {
       const target = targets.find(t => t.id === Number(id));
       if (target) {
         setHabitId(target.habitId);
-        setType(target.type as 'weekly' | 'monthly');
+        setType(target.type as 'daily' | 'weekly' | 'monthly');
         setDirection(target.direction as 'min' | 'max');
         const habit = habits.find(h => h.id === target.habitId);
         if (habit?.unit === 'hrs/mins') {
@@ -131,6 +131,14 @@ export default function EditTargetScreen() {
 
       <Text style={styles.label}>Period</Text>
       <View style={styles.toggle}>
+        <TouchableOpacity
+          style={[styles.toggleBtn, type === 'daily' && styles.toggleActive]}
+          onPress={() => setType('daily')}
+        >
+          <Text style={[styles.toggleText, type === 'daily' && styles.toggleTextActive]}>
+            Daily
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toggleBtn, type === 'weekly' && styles.toggleActive]}
           onPress={() => setType('weekly')}
