@@ -1,3 +1,4 @@
+//This imports all the hooks and database utilities needed to manage habits
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/db/client';
 import { habits } from '@/db/schema';
@@ -11,6 +12,7 @@ export function useHabits() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  //This fetches all habits for the current user from the database
   async function load() {
     if (!user) return;
     setIsLoading(true);
@@ -25,23 +27,27 @@ export function useHabits() {
     }
   }
 
+  //This reloads habits whenever the screen comes into focus or the user changes
   useFocusEffect(
     useCallback(() => {
       load();
     }, [user?.id])
   );
 
+  //This inserts a new habit and reloads the list
   async function addHabit(name: string, metricType: string, unit: string, categoryId: number) {
     if (!user) return;
     await db.insert(habits).values({ userId: user.id, name, metricType, unit, categoryId });
     load();
   }
 
+  //This updates an existing habit's fields and reloads the list
   async function updateHabit(id: number, name: string, metricType: string, unit: string, categoryId: number) {
     await db.update(habits).set({ name, metricType, unit, categoryId }).where(eq(habits.id, id));
     load();
   }
 
+  //This deletes a habit by ID and reloads the list
   async function deleteHabit(id: number) {
     await db.delete(habits).where(eq(habits.id, id));
     load();

@@ -1,20 +1,23 @@
+//This imports all the components and contexts needed for the new log screen
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
 import { useHabitsContext } from '@/context/HabitsContext';
+import { useTheme } from '@/context/ThemeContext';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate, isValidDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
+//This returns the placeholder text for the value input based on the habit's unit
 function getValuePlaceholder(unit: string): string {
   if (unit === 'hrs/mins') return '';
   return `e.g. 5 ${unit}`;
 }
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container:        { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 56 },
@@ -41,6 +44,7 @@ export default function NewLogScreen() {
   const { colours } = useTheme();
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
+  //This defaults the date field to today's date in DD/MM/YYYY format
   const today = formatDisplayDate(new Date().toISOString().split('T')[0]);
 
   const [selectedHabitId, setSelectedHabitId] = useState<number | null>(
@@ -53,10 +57,12 @@ export default function NewLogScreen() {
   const [boolValue, setBoolValue] = useState(true);
   const [notes, setNotes] = useState('');
 
+  //This looks up the currently selected habit from the habits list
   const habit = habits.find(h => h.id === selectedHabitId);
 
   const habitOptions = habits.map(h => ({ label: h.name, value: String(h.id) }));
 
+  //This validates the form, converts the value to the correct format, and saves the log entry
   async function handleSave() {
     if (!selectedHabitId) {
       Alert.alert('Error', 'Please select a habit.');
@@ -106,6 +112,7 @@ export default function NewLogScreen() {
           onChangeText={setDate}
         />
 
+        {/*This shows a boolean toggle, hours/mins fields, or a single value field depending on the habit type*/}
         {habit?.metricType === 'boolean' ? (
           <View style={styles.boolRow}>
             <Text style={styles.label}>Done?</Text>

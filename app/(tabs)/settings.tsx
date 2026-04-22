@@ -1,22 +1,24 @@
+//This imports all the components and contexts needed for the settings screen
 import { AppColours } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
-import { forceSeed } from '@/db/seed';
 import { categories, habitLogs, habits as habitsTable, targets, users } from '@/db/schema';
+import { forceSeed } from '@/db/seed';
 import { useHabits } from '@/hooks/useHabits';
 import { useLogs } from '@/hooks/useLogs';
 import { buildCsv } from '@/utils/csvHelpers';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { eq } from 'drizzle-orm';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Notifications from 'expo-notifications';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container:        { flex: 1, backgroundColor: c.background },
@@ -66,6 +68,7 @@ export default function SettingsScreen() {
 
   const initials = (user?.username ?? '?').charAt(0).toUpperCase();
 
+  //This loads any previously saved reminder time from storage when the screen mounts
   useEffect(() => {
     AsyncStorage.getItem('reminderTime').then(saved => {
       if (saved) {
@@ -77,6 +80,7 @@ export default function SettingsScreen() {
     });
   }, []);
 
+  //This requests notification permission, cancels any existing reminders, and schedules a new daily one
   async function handleSetReminder() {
     const hour   = Math.min(23, Math.max(0, parseInt(reminderHour,   10) || 0));
     const minute = Math.min(59, Math.max(0, parseInt(reminderMinute, 10) || 0));
@@ -113,6 +117,7 @@ export default function SettingsScreen() {
     setReminderConfirm(timeStr);
   }
 
+  //This builds a CSV from the user's logs and shares it through the device share sheet
   async function handleExport() {
     const habitMap = Object.fromEntries(habits.map(h => [h.id, h.name]));
     const csv = buildCsv(logs, habitMap);
@@ -125,6 +130,7 @@ export default function SettingsScreen() {
     }
   }
 
+  //This re runs the seed script and alerts with the demo credentials
   async function handleForceSeed() {
     await forceSeed();
     Alert.alert('Seed complete!', 'Log in with username: Demo, password: demo123');
@@ -135,6 +141,7 @@ export default function SettingsScreen() {
     router.replace('/(auth)/login');
   }
 
+  //This asks for confirmation then deletes all of the user's data before logging them out
   function handleDeleteAccount() {
     Alert.alert(
       'Delete Account',
@@ -163,11 +170,13 @@ export default function SettingsScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
+      {/*This shows an avatar circle with the user's initial and their username below*/}
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>{initials}</Text>
       </View>
       <Text style={styles.username}>{user?.username}</Text>
 
+      {/*This is the light and dark mode toggle*/}
       <Text style={styles.sectionLabel}>Theme</Text>
       <View style={styles.card}>
         <View style={[styles.row, { paddingBottom: 12 }]}>
@@ -197,6 +206,7 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/*This is the daily reminder time picker that saves the time and schedules a local notification*/}
       <Text style={styles.sectionLabel}>Notifications</Text>
       <View style={styles.card}>
         <View style={styles.row}>
@@ -239,6 +249,7 @@ export default function SettingsScreen() {
         )}
       </View>
 
+      {/*This links to the categories management screen*/}
       <Text style={styles.sectionLabel}>App</Text>
       <View style={styles.card}>
         <TouchableOpacity
@@ -254,6 +265,7 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </View>
 
+      {/*This exports all habit logs as a CSV file*/}
       <Text style={styles.sectionLabel}>Data</Text>
       <View style={styles.card}>
         <View style={styles.row}>
@@ -270,6 +282,7 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/*This manually re runs the seed script to populate demo data*/}
       <Text style={styles.sectionLabel}>Developer</Text>
       <View style={styles.card}>
         <View style={styles.row}>
@@ -286,6 +299,7 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/*This is the log out and delete account buttons*/}
       <Text style={styles.sectionLabel}>Account</Text>
       <TouchableOpacity
         style={styles.logoutBtn}

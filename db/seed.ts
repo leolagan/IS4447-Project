@@ -1,14 +1,17 @@
-import * as Crypto from 'expo-crypto';
+//This imports all the utilities and schemas needed to create the demo account and its data
 import { eq } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { db } from './client';
 import { categories, habitLogs, habits, targets, users } from './schema';
 
+//This returns a date string N days in the past in YYYY-MM-DD format
 function daysAgo(n: number): string {
   const d = new Date();
   d.setDate(d.getDate() - n);
   return d.toISOString().split('T')[0];
 }
 
+//This deletes all existing demo data and re runs the seed so the Demo account is fresh
 export async function forceSeed() {
   const existing = await db.select().from(users).where(eq(users.username, 'Demo'));
   if (existing.length > 0) {
@@ -22,6 +25,7 @@ export async function forceSeed() {
   await seedIfEmpty();
 }
 
+//This creates the Demo account with categories, habits, logs and targets only if it does not already exist
 export async function seedIfEmpty() {
   const existing = await db.select().from(users).where(eq(users.username, 'Demo'));
   if (existing.length > 0) return;
@@ -34,6 +38,7 @@ export async function seedIfEmpty() {
     .returning();
   const userId = inserted[0].id;
 
+  //This inserts the demo categories
   await db.insert(categories).values([
     { userId, name: 'Fitness',       color: '#FF6B6B' },
     { userId, name: 'Nutrition',     color: '#51CF66' },
@@ -53,6 +58,7 @@ export async function seedIfEmpty() {
   const wellness  = cats.find(c => c.name === 'Wellness')!;
   const recovery  = cats.find(c => c.name === 'Recovery')!;
 
+  //This inserts the demo habits
   await db.insert(habits).values([
     { userId, name: 'Run',          metricType: 'count',   unit: 'km',       categoryId: fitness.id },
     { userId, name: 'Gym Session',  metricType: 'boolean', unit: 'boolean',  categoryId: fitness.id },
@@ -76,6 +82,7 @@ export async function seedIfEmpty() {
   const sleepValues    = [420, 360, 480, 300, 480, 420, 420, 390, 450, 480, 360, 420, 480, 420, 390];
   const stretchValues  = [15, 20, 15, 25, 20, 15, 30, 20, 15, 25, 20, 15, 20, 25, 15];
 
+  //This builds a list of log entries spread across the last 180 days
   const logEntries: {
     userId: number;
     habitId: number;
@@ -145,11 +152,13 @@ export async function seedIfEmpty() {
     }
   }
 
+  //This inserts log entries in batches to avoid SQLite statement limits
   const BATCH_SIZE = 40;
   for (let i = 0; i < logEntries.length; i += BATCH_SIZE) {
     await db.insert(habitLogs).values(logEntries.slice(i, i + BATCH_SIZE));
   }
 
+  //This inserts the demo targets
   await db.insert(targets).values([
     { userId, habitId: run.id,        type: 'weekly',  goal: 20,    direction: 'min' },
     { userId, habitId: gym.id,        type: 'weekly',  goal: 3,     direction: 'min' },

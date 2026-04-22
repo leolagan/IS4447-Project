@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the targets screen
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
@@ -8,18 +9,21 @@ import { useMemo } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+//This returns a colour based on whether the target is exceeded, met or still pending
 function getBarColour(item: TargetWithProgress, c: typeof AppColours): string {
   if (item.isExceeded) return c.danger;
   if (item.isMet)      return c.success;
   return c.primary;
 }
 
+//This returns the chip and text styles for the status badge based on the target's progress
 function getStatusChipStyles(item: TargetWithProgress, styles: ReturnType<typeof makeStyles>) {
   if (item.isExceeded) return { chip: styles.statusExceeded, text: styles.statusExceededText };
   if (item.isMet)      return { chip: styles.statusMet,      text: styles.statusMetText };
   return                      { chip: styles.statusPending,  text: styles.statusPendingText };
 }
 
+//This returns a readable status string showing remaining progress or how far over the target is
 function getStatusLabel(item: TargetWithProgress): string {
   if (item.isExceeded) {
     const over = item.progress - item.goal;
@@ -30,6 +34,7 @@ function getStatusLabel(item: TargetWithProgress): string {
   return `${formatValue(remaining, item.habitUnit, item.habitMetricType)} to go`;
 }
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container:         { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 20 },
@@ -94,10 +99,12 @@ export default function TargetsScreen() {
   const styles = useMemo(() => makeStyles(colours), [colours]);
   const getChipStyles = (item: TargetWithProgress) => getStatusChipStyles(item, styles);
 
+  //This looks up the category colour for a given category ID
   function getCategoryColour(categoryId: number): string {
     return categories.find(c => c.id === categoryId)?.color ?? '#ccc';
   }
 
+  //This shows a confirmation dialog before deleting a target
   function confirmDelete(id: number) {
     Alert.alert('Delete Target', 'Are you sure you want to delete this target?', [
       { text: 'Cancel', style: 'cancel' },
@@ -105,6 +112,7 @@ export default function TargetsScreen() {
     ]);
   }
 
+  //This builds the direction label showing the goal amount and period
   function getDirectionLabel(item: TargetWithProgress): string {
     const dirText = item.direction === 'min' ? 'At least' : 'No more than';
     const goalFormatted = formatValue(item.goal, item.habitUnit, item.habitMetricType);
@@ -112,6 +120,7 @@ export default function TargetsScreen() {
     return `${dirText} ${goalFormatted} ${period}`;
   }
 
+  //This shows a spinner while targets are loading
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -120,6 +129,7 @@ export default function TargetsScreen() {
     );
   }
 
+  //This shows an error message if fetching targets failed
   if (error) {
     return (
       <View style={styles.centered}>
@@ -142,7 +152,9 @@ export default function TargetsScreen() {
           const barColour = getBarColour(item, colours);
 
           return (
+            //This animates each card in with a staggered fade when the list renders
             <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+              {/*This renders each target as a card with a progress bar and status chip*/}
               <TouchableOpacity
                 style={styles.card}
                 onPress={() => router.push(`/target/edit/${item.id}`)}
@@ -199,6 +211,7 @@ export default function TargetsScreen() {
             </Animated.View>
           );
         }}
+        //This shows an empty state when no targets have been created
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.empty}>No targets yet.</Text>
@@ -207,6 +220,7 @@ export default function TargetsScreen() {
         }
       />
 
+      {/*This is the + button to add a new target*/}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push('/target/new')}

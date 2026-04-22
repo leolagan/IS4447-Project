@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the habit card
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { formatUnit } from '@/utils/formatters';
@@ -18,6 +19,7 @@ type Props = {
   onComplete: () => void;
 };
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     card: {
@@ -59,6 +61,7 @@ export default function HabitCard({
 
   return (
     <View style={styles.card}>
+      {/*This is the circular completion checkbox on the left of the card*/}
       <TouchableOpacity
         style={[styles.circle, isCompleted ? styles.circleFilled : styles.circleEmpty]}
         onPress={onComplete}
@@ -70,8 +73,10 @@ export default function HabitCard({
         {isCompleted && <Text style={styles.check}>✓</Text>}
       </TouchableOpacity>
 
+      {/*This is the coloured category bar on the left edge of the card body*/}
       <View style={[styles.categoryBar, { backgroundColor: categoryColor }]} />
 
+      {/*This shows the habit name, category tag, unit and streak pill*/}
       <View style={styles.cardBody}>
         <Text style={styles.name}>{name}</Text>
         <View style={styles.tagRow}>
@@ -87,6 +92,7 @@ export default function HabitCard({
         </View>
       </View>
 
+      {/*This shows the edit and delete action buttons on the right*/}
       <View style={styles.actions}>
         <TouchableOpacity
           onPress={onPress}

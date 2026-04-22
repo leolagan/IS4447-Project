@@ -1,3 +1,4 @@
+//This defines the colour palette for the light theme
 export const AppColours = {
   primary:      '#10C9A0',
   primaryLight: '#DCF9F1',
@@ -13,6 +14,7 @@ export const AppColours = {
   border:       '#DDE9E5',
 };
 
+//This defines the colour palette for the dark theme
 export const DarkColours = {
   primary:      '#10C9A0',
   primaryLight: '#0D2420',
@@ -28,6 +30,7 @@ export const DarkColours = {
   border:       '#27272A',
 };
 
+//This defines the Sora font family variants used throughout the app
 export const FontFamily = {
   regular:  'Sora_400Regular',
   semiBold: 'Sora_600SemiBold',

@@ -1,13 +1,18 @@
+//This provides date formatting, parsing, validation, week/month range and streak calculation utilities
+
+//This converts a YYYY-MM-DD date string to DD/MM/YYYY for display
 export function formatDisplayDate(isoDate: string): string {
   const [y, m, d] = isoDate.split('-');
   return `${d}/${m}/${y}`;
 }
 
+//This converts a DD/MM/YYYY display date back to YYYY-MM-DD for storage
 export function parseDisplayDate(displayDate: string): string {
   const [d, m, y] = displayDate.split('/');
   return `${y}-${m}-${d}`;
 }
 
+//This checks that the string matches DD/MM/YYYY format and represents a real calendar date
 export function isValidDisplayDate(s: string): boolean {
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return false;
   const [d, m, y] = s.split('/').map(Number);
@@ -16,6 +21,7 @@ export function isValidDisplayDate(s: string): boolean {
   return d >= 1 && d <= maxDay;
 }
 
+//This returns the start and end dates of the current week with Monday as the first day
 export function getWeekRange(): { start: string; end: string } {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -29,6 +35,7 @@ export function getWeekRange(): { start: string; end: string } {
   };
 }
 
+//This returns the first and last day of the current calendar month
 export function getMonthRange(): { start: string; end: string } {
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -39,10 +46,12 @@ export function getMonthRange(): { start: string; end: string } {
   };
 }
 
+//This counts how many consecutive days up to today the user met or exceeded the given goal
 export function calcStreak(logDates: string[], logValues: number[], goal: number): number {
   if (logDates.length === 0) return 0;
   const threshold = goal > 0 ? goal : 1;
 
+  //This filters out dates where the logged value was below the threshold
   const qualifyingDates = logDates.filter((_, i) => logValues[i] >= threshold);
   if (qualifyingDates.length === 0) return 0;
 
@@ -50,10 +59,12 @@ export function calcStreak(logDates: string[], logValues: number[], goal: number
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const todayTs = today.getTime();
 
+  //This deduplicates the dates, converts them to timestamps and sorts them newest first
   const unique = [...new Set(qualifyingDates)]
     .map(d => { const dt = new Date(d); dt.setHours(0, 0, 0, 0); return dt.getTime(); })
     .sort((a, b) => b - a);
 
+  //This returns 0 if the most recent qualifying day is older than yesterday
   if (unique[0] !== todayTs && unique[0] !== todayTs - DAY) return 0;
 
   let streak = 1;

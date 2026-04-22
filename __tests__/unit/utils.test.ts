@@ -1,3 +1,4 @@
+//This swaps expo-sqlite for an in-memory database so tests run in Node without a real device
 jest.mock('expo-sqlite', () => {
   const Database = require('better-sqlite3');
   const sqlite = new Database(':memory:');
@@ -30,13 +31,16 @@ jest.mock('expo-sqlite', () => {
   };
 });
 
+//This imports the database client, seed function, and table schemas being tested
 import { db } from '@/db/client';
-import { seedIfEmpty } from '@/db/seed';
 import { categories, habitLogs, habits, targets } from '@/db/schema';
+import { seedIfEmpty } from '@/db/seed';
 
 describe('seedIfEmpty', () => {
+  //This is stored after the first seed so the second test can compare against it
   let countAfterFirstSeed: { habits: number; categories: number; targets: number; logs: number };
 
+  //This checks that calling seedIfEmpty actually writes rows to every table
   it('populates habits, categories, targets and habitLogs with data', async () => {
     await seedIfEmpty();
 
@@ -58,6 +62,7 @@ describe('seedIfEmpty', () => {
     };
   });
 
+  //This checks that running the seed a second time doesn't insert duplicate rows
   it('does not create duplicate rows when called a second time', async () => {
     await seedIfEmpty();
 

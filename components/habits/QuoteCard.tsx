@@ -1,9 +1,11 @@
+//This imports all the components and contexts needed for the quote card
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     quoteCard: {
@@ -34,6 +36,7 @@ export default function QuoteCard() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError]     = useState(false);
 
+  //This fetches a random motivational quote from the API and stores it in state
   async function fetchQuote() {
     setQuoteLoading(true);
     setQuoteError(false);
@@ -48,10 +51,12 @@ export default function QuoteCard() {
     }
   }
 
+  //This refreshes the quote every time the screen comes into focus
   useFocusEffect(useCallback(() => { fetchQuote(); }, []));
 
   return (
     <View style={styles.quoteCard}>
+      {/*This shows a spinner, an error message or the quote text depending on the fetch state*/}
       {quoteLoading ? (
         <ActivityIndicator size="small" color={colours.primary} />
       ) : quoteError ? (

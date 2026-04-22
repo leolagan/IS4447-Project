@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the habits screen
 import HabitCard from '@/components/habits/HabitCard';
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
@@ -24,10 +25,12 @@ type Habit = typeof habits.$inferSelect;
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+//This returns today's date as a YYYY-MM-DD string
 function getTodayStr(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+//This builds an array of the last 7 days for the date strip at the top of the screen
 function buildDayStrip(): { date: string; dayName: string; dayNum: string }[] {
   const result = [];
   for (let i = 6; i >= 0; i--) {
@@ -42,6 +45,7 @@ function buildDayStrip(): { date: string; dayName: string; dayNum: string }[] {
   return result;
 }
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 20 },
@@ -105,6 +109,7 @@ export default function HabitsScreen() {
   const router = useRouter();
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
+  //This defaults the selected date to today and holds filter and modal state
   const [selectedDate, setSelectedDate] = useState<string>(getTodayStr);
   const [searchText, setSearchText]     = useState('');
   const [selectedCategoryId, setSelectedCat] = useState<string | null>(null);
@@ -118,6 +123,7 @@ export default function HabitsScreen() {
 
   const dayStrip = useMemo(() => buildDayStrip(), []);
 
+  //This finds the log entry for a given habit on the selected date
   function getLog(habitId: number): Log | undefined {
     return logs.find(l => l.habitId === habitId && l.date === selectedDate);
   }
@@ -130,6 +136,7 @@ export default function HabitsScreen() {
     return categories.find(c => c.id === categoryId)?.name ?? '';
   }
 
+  //This shows a confirmation dialog before deleting a habit
   function confirmDelete(id: number) {
     Alert.alert('Delete Habit', 'Are you sure you want to delete this habit?', [
       { text: 'Cancel', style: 'cancel' },
@@ -137,6 +144,7 @@ export default function HabitsScreen() {
     ]);
   }
 
+  //This toggles a boolean habit's log or opens the value modal for numeric habits
   function handleComplete(habit: Habit) {
     const existing = getLog(habit.id);
     if (habit.metricType === 'boolean') {
@@ -164,6 +172,7 @@ export default function HabitsScreen() {
     }
   }
 
+  //This saves or updates the log entry from the modal
   async function handleModalSave() {
     if (!modalHabit) return;
     const existing = getLog(modalHabit.id);
@@ -178,6 +187,7 @@ export default function HabitsScreen() {
     setModalHabit(null);
   }
 
+  //This filters habits by search text and selected category
   const search = searchText.trim().toLowerCase();
   const filteredHabits = habits.filter(h => {
     const matchesCat  = !selectedCategoryId || h.categoryId === parseInt(selectedCategoryId);
@@ -188,6 +198,7 @@ export default function HabitsScreen() {
   const activeFilterCount = (search ? 1 : 0) + (selectedCategoryId ? 1 : 0);
   const filtersActive = activeFilterCount > 0;
 
+  //This builds the category options for the dropdown with an 'All' option at the top
   const categoryOptions = [
     { label: 'All Categories', value: '' },
     ...categories.map(c => ({ label: c.name, value: String(c.id), colour: c.color })),
@@ -198,6 +209,7 @@ export default function HabitsScreen() {
     setSelectedCat(null);
   }
 
+  //This shows a spinner while habits are loading
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -206,6 +218,7 @@ export default function HabitsScreen() {
     );
   }
 
+  //This shows an error message if something went wrong fetching habits
   if (error) {
     return (
       <View style={styles.centered}>
@@ -218,8 +231,8 @@ export default function HabitsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>My Habits</Text>
 
+      {/*This is the 7 day date strip, tap a day to view logs for that date*/}
       <View style={styles.strip}>
-
         {dayStrip.map(day => {
           const active = day.date === selectedDate;
           return (
@@ -239,6 +252,7 @@ export default function HabitsScreen() {
         })}
       </View>
 
+      {/*This is the filter toggle button, the badge shows how many filters are active*/}
       <TouchableOpacity
         style={styles.filterToggle}
         onPress={() => setFiltersOpen(v => !v)}
@@ -256,6 +270,7 @@ export default function HabitsScreen() {
         )}
       </TouchableOpacity>
 
+      {/*This is the expandable filter panel with search and category dropdown*/}
       {filtersOpen && (
         <View style={styles.filterPanel}>
           <FormField
@@ -290,6 +305,7 @@ export default function HabitsScreen() {
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item, index }) => {
+          //This works out the streak and completion state for each habit card
           const habitLogEntries = logs.filter(l => l.habitId === item.id);
           const dailyTarget  = targets.find(t => t.habitId === item.id && t.type === 'daily');
           const weeklyTarget = targets.find(t => t.habitId === item.id && t.type === 'weekly');
@@ -303,6 +319,7 @@ export default function HabitsScreen() {
           const existing    = getLog(item.id);
           const isCompleted = !!existing;
           return (
+            //This animates each card in with a staggered fade when the list renders
             <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
               <HabitCard
                 name={item.name}
@@ -319,6 +336,8 @@ export default function HabitsScreen() {
             </Animated.View>
           );
         }}
+
+        //This changes the empty state message depending on whether filters are active
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.empty}>
@@ -341,6 +360,7 @@ export default function HabitsScreen() {
         }
       />
 
+      {/*This is the + button in the bottom right corner to add a new habit*/}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push('/habit/new')}
@@ -351,6 +371,7 @@ export default function HabitsScreen() {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
+      {/*This is the bottom sheet modal for logging a numeric habit value*/}
       <Modal
         visible={modalHabit !== null}
         transparent
@@ -366,6 +387,7 @@ export default function HabitsScreen() {
               <View style={styles.sheet}>
                 <Text style={styles.sheetTitle}>{modalHabit?.name}</Text>
 
+                {/*This gives hrs/mins habits two fields and everything else one*/}
                 {modalHabit?.unit === 'hrs/mins' ? (
                   <View style={styles.sheetRow}>
                     <View style={styles.sheetField}>

@@ -1,16 +1,19 @@
+//This imports all the components and contexts needed for the edit habit screen
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
+import { useHabitsContext } from '@/context/HabitsContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
-import { useHabitsContext } from '@/context/HabitsContext';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This tracks which unit values come from the preset list rather than custom input
 const PRESET_UNIT_VALUES = new Set(['km','hrs/mins','grams']);
 
+//This lists the preset unit options available in the unit dropdown
 const UNIT_OPTIONS = [
   { label: 'km', value: 'km' },
   { label: 'hours/mins', value: 'hrs/mins' },
@@ -18,6 +21,7 @@ const UNIT_OPTIONS = [
   { label: '+ Custom unit…', value: '__custom__' },
 ];
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     scroll:           { flex: 1, backgroundColor: c.background },
@@ -49,6 +53,7 @@ export default function EditHabitScreen() {
   const [metricType, setMetricType] = useState<'count' | 'boolean'>('count');
   const [categoryId, setCategoryId] = useState<number | null>(null);
 
+  //This loads the existing habit's values into the form fields when the screen mounts
   useEffect(() => {
     const habit = habits.find(h => h.id === Number(id));
     if (habit) {
@@ -64,12 +69,14 @@ export default function EditHabitScreen() {
     }
   }, [habits, id]);
 
+  //This maps categories to the format the DropdownPicker expects
   const categoryOptions = categories.map(c => ({
     label: c.name,
     value: String(c.id),
     colour: c.color,
   }));
 
+  //This validates the form and saves the updated habit before navigating back
   async function handleSave() {
     if (!name.trim()) {
       Alert.alert('Error', 'Please enter a habit name.');
@@ -103,6 +110,7 @@ export default function EditHabitScreen() {
         onChangeText={setName}
       />
 
+      {/*This is the count vs done/not done metric type toggle*/}
       <Text style={styles.label}>Type</Text>
       <View style={styles.toggle}>
         <TouchableOpacity
@@ -123,6 +131,7 @@ export default function EditHabitScreen() {
         </TouchableOpacity>
       </View>
 
+      {/*This shows a custom text field or a preset dropdown depending on what the user selected*/}
       {metricType === 'count' && (
         isCustomUnit ? (
           <>
@@ -154,6 +163,7 @@ export default function EditHabitScreen() {
         )
       )}
 
+      {/*This lets the user assign the habit to one of their categories*/}
       <DropdownPicker
         label="Category"
         options={categoryOptions}

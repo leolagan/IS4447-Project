@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the form field component
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useMemo } from 'react';
@@ -14,6 +15,7 @@ type Props = {
   secureTextEntry?: boolean;
 };
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container: {
@@ -63,6 +65,7 @@ export default function FormField({
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
   return (
+    //This renders the label and text input with support for multiline, numeric and secure text entry
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <TextInput

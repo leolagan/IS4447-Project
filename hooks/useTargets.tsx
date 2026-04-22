@@ -1,3 +1,4 @@
+//This imports all the hooks and utilities needed to load targets combined with calculated progress
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/db/client';
 import { habitLogs, habits, targets } from '@/db/schema';
@@ -6,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { eq } from 'drizzle-orm';
 import { useCallback, useState } from 'react';
 
+//This is the combined target type that includes the linked habit's details and its progress for the current period
 export type TargetWithProgress = {
   id: number;
   habitId: number;
@@ -27,6 +29,7 @@ export function useTargets() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  //This fetches all targets, habits, and logs then combines them with calculated progress for each period
   async function load() {
     if (!user) return;
     setIsLoading(true);
@@ -39,11 +42,12 @@ export function useTargets() {
       const { start: weekStart,  end: weekEnd  } = getWeekRange();
       const { start: monthStart, end: monthEnd } = getMonthRange();
 
-      const enriched: TargetWithProgress[] = allTargets
+      const combined: TargetWithProgress[] = allTargets
         .map(target => {
           const habit = allHabits.find(h => h.id === target.habitId);
           if (!habit) return null;
 
+          //This filters logs to only those that fall within the target's current period
           const relevantLogs = allLogs.filter(log => {
             if (log.habitId !== target.habitId) return false;
             if (target.type === 'daily')   return log.date === today;
@@ -52,6 +56,7 @@ export function useTargets() {
             return false;
           });
 
+          //This sums the relevant log values, counting boolean habits by number of completions
           let progress: number;
           if (habit.metricType === 'boolean') {
             progress = relevantLogs.filter(l => l.value === 1).length;
@@ -59,6 +64,7 @@ export function useTargets() {
             progress = relevantLogs.reduce((sum, l) => sum + l.value, 0);
           }
 
+          //This checks whether the progress satisfies the target direction and whether the cap has been exceeded
           const isMet      = target.direction === 'min' ? progress >= target.goal : progress <= target.goal;
           const isExceeded = target.direction === 'max' && progress > target.goal;
 
@@ -79,7 +85,7 @@ export function useTargets() {
         })
         .filter((t): t is TargetWithProgress => t !== null);
 
-      setData(enriched);
+      setData(combined);
       setError(null);
     } catch {
       setError('Failed to load targets.');
@@ -88,23 +94,27 @@ export function useTargets() {
     }
   }
 
+  //This reloads targets whenever the screen comes into focus or the user changes
   useFocusEffect(
     useCallback(() => {
       load();
     }, [user?.id])
   );
 
+  //This inserts a new target and reloads the list
   async function addTarget(habitId: number, type: string, goal: number, direction: string) {
     if (!user) return;
     await db.insert(targets).values({ userId: user.id, habitId, type, goal, direction });
     load();
   }
 
+  //This updates an existing target and reloads the list
   async function updateTarget(id: number, habitId: number, type: string, goal: number, direction: string) {
     await db.update(targets).set({ habitId, type, goal, direction }).where(eq(targets.id, id));
     load();
   }
 
+  //This deletes a target by ID and reloads the list
   async function deleteTarget(id: number) {
     await db.delete(targets).where(eq(targets.id, id));
     load();

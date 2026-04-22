@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the edit category screen
 import ColourPicker from '@/components/ui/ColourPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
@@ -9,6 +10,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This lists the available icon options the user can pick for their category
 const ICONS = [
   'heart-outline', 'fitness-outline', 'book-outline', 'moon-outline', 'nutrition-outline',
   'walk-outline', 'barbell-outline', 'water-outline', 'bulb-outline', 'musical-notes-outline',
@@ -18,6 +20,7 @@ const ICONS = [
 
 type IconName = typeof ICONS[number];
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     scroll:         { flex: 1, backgroundColor: c.background },
@@ -59,6 +62,7 @@ export default function EditCategoryScreen() {
   const [selectedIcon, setSelectedIcon] = useState<IconName | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  //This loads the existing category's values into the form fields when the screen mounts
   useEffect(() => {
     if (!loaded && categories.length > 0) {
       const cat = categories.find(c => c.id === Number(id));
@@ -71,6 +75,7 @@ export default function EditCategoryScreen() {
     }
   }, [categories, loaded, id]);
 
+  //This validates the form and saves the updated category before navigating back
   async function handleSave() {
     if (!categoryName.trim()) {
       Alert.alert('Error', 'Please enter a category name.');
@@ -97,6 +102,7 @@ export default function EditCategoryScreen() {
 
       <ColourPicker selectedColour={colour} onSelect={setColour} />
 
+      {/*This is the icon picker grid*/}
       <Text style={styles.label}>Icon</Text>
       <View style={styles.iconGrid}>
         {ICONS.map(icon => (
@@ -117,6 +123,7 @@ export default function EditCategoryScreen() {
         ))}
       </View>
 
+      {/*This shows a live preview of the category with the selected colour and icon*/}
       <View style={styles.preview}>
         <View style={[styles.previewSwatch, { backgroundColor: colour }]}>
           {selectedIcon && (

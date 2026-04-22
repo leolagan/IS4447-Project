@@ -1,8 +1,10 @@
+//This imports all the components and contexts needed for the colour picker
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This lists the 12 preset colours available for selection
 const PRESET_COLOURS = [
   '#FF6B6B', '#FA5252', '#FF922B', '#FCC419',
   '#51CF66', '#20C997', '#339AF0', '#4DABF7',
@@ -14,6 +16,7 @@ type Props = {
   onSelect: (colour: string) => void;
 };
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container: {
@@ -58,6 +61,7 @@ export default function ColourPicker({ selectedColour, onSelect }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Colour</Text>
+      {/*This renders a circular swatch for each preset colour with a checkmark ring on the selected one*/}
       <View style={styles.grid}>
         {PRESET_COLOURS.map(colour => {
           const isSelected = colour === selectedColour;

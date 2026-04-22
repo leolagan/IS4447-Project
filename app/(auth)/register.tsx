@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the register screen
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
@@ -5,12 +6,13 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { categories, users } from '@/db/schema';
-import * as Crypto from 'expo-crypto';
 import { eq } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     flex:       { flex: 1, backgroundColor: c.background },
@@ -40,6 +42,7 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  //This validates the form, checks the username isn't taken, hashes the password, creates the user, and seeds their default categories before navigating to the app
   async function handleRegister() {
     setError(null);
 
@@ -67,6 +70,7 @@ export default function RegisterScreen() {
 
     const newUser = result[0];
 
+    //This gives every new user a set of default categories to get started with
     await db.insert(categories).values([
       { userId: newUser.id, name: 'Health',       color: '#FF6B6B' },
       { userId: newUser.id, name: 'Fitness',      color: '#FF922B' },
@@ -83,6 +87,7 @@ export default function RegisterScreen() {
   }
 
   return (
+    //This shifts the layout up on iOS when the keyboard appears
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -92,6 +97,7 @@ export default function RegisterScreen() {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
+        {/*This shows the logo and app name*/}
         <View style={styles.header}>
           <Image
             source={require('@/assets/images/icon.png')}
@@ -105,6 +111,7 @@ export default function RegisterScreen() {
         <Text style={styles.subtitle}>Start tracking your habits</Text>
         <View style={styles.divider} />
 
+        {/*This renders the username and password inputs*/}
         <FormField
           label="Username"
           placeholder="Choose a username"
@@ -132,6 +139,7 @@ export default function RegisterScreen() {
 
         <PrimaryButton title="Create Account" onPress={handleRegister} />
 
+        {/*This links back to the login screen for existing users*/}
         <TouchableOpacity
           style={styles.switchRow}
           onPress={() => router.replace('/(auth)/login')}

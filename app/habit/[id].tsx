@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the habit detail screen
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
@@ -11,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container:     { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 60 },
@@ -108,6 +110,8 @@ export default function HabitDetailScreen() {
   const styles = useMemo(() => makeStyles(colours), [colours]);
 
   type DateRange = 'all' | 'today' | 'week' | 'month';
+
+  //This defines the date range filter options shown above the log list
   const RANGE_LABELS: { key: DateRange; label: string }[] = [
     { key: 'all',   label: 'All' },
     { key: 'today', label: 'Today' },
@@ -120,6 +124,7 @@ export default function HabitDetailScreen() {
   const habit = habits.find(h => h.id === habitId);
   const category = categories.find(c => c.id === habit?.categoryId);
 
+  //This filters and sorts logs by the selected date range
   const filteredLogs = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const sorted = [...logs].sort((a, b) => b.date.localeCompare(a.date));
@@ -139,6 +144,7 @@ export default function HabitDetailScreen() {
     return sorted;
   }, [logs, dateRange]);
 
+  //This shows a confirmation dialog before deleting a log entry
   function confirmDeleteLog(logId: number) {
     Alert.alert('Delete Log', 'Are you sure you want to delete this log?', [
       { text: 'Cancel', style: 'cancel' },
@@ -146,6 +152,7 @@ export default function HabitDetailScreen() {
     ]);
   }
 
+  //This formats a log value based on whether the habit tracks boolean or numeric data
   function formatValue(value: number) {
     if (habit?.metricType === 'boolean') return value === 1 ? 'Done' : 'Not Done';
     return sharedFormatValue(value, habit?.unit ?? '', habit?.metricType ?? '');
@@ -162,6 +169,7 @@ export default function HabitDetailScreen() {
   return (
     <View style={styles.container}>
 
+      {/*This is the back button and the edit icon for the habit*/}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.back}>‹ Back</Text>
@@ -176,6 +184,7 @@ export default function HabitDetailScreen() {
         </TouchableOpacity>
       </View>
 
+      {/*This shows the habit name, category tag, and unit*/}
       <View style={[styles.habitCard, { borderLeftColor: category?.color ?? '#ccc' }]}>
         <Text style={styles.habitName}>{habit.name}</Text>
         <View style={styles.tagRow}>
@@ -190,6 +199,7 @@ export default function HabitDetailScreen() {
 
       <Text style={styles.sectionTitle}>Logs</Text>
 
+      {/*This is the date range filter toggle for the log list*/}
       <View style={styles.rangeRow}>
         {RANGE_LABELS.map(({ key, label }) => (
           <TouchableOpacity
@@ -207,6 +217,7 @@ export default function HabitDetailScreen() {
         ))}
       </View>
 
+      {/*This lists all logs matching the selected date range*/}
       <FlatList
         data={filteredLogs}
         keyExtractor={item => item.id.toString()}
@@ -249,6 +260,7 @@ export default function HabitDetailScreen() {
         }
       />
 
+      {/*This is the + button to add a new log for this habit*/}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push(`/log/new?habitId=${habitId}`)}

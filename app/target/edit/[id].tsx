@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the edit target screen
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
@@ -9,12 +10,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This returns the placeholder text for the goal field based on the habit's unit and metric type
 function getGoalPlaceholder(unit: string, metricType: string): string {
   if (unit === 'hrs/mins') return '';
   if (metricType === 'boolean') return 'e.g. 3';
   return `e.g. 10 ${unit}`;
 }
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     scroll:           { flex: 1, backgroundColor: c.background },
@@ -52,6 +55,7 @@ export default function EditTargetScreen() {
   const selectedHabit = habits.find(h => h.id === habitId);
   const isTimeHabit = selectedHabit?.unit === 'hrs/mins';
 
+  //This loads the existing target's values into the form fields when the screen mounts
   useEffect(() => {
     if (!loaded && targets.length > 0 && habits.length > 0) {
       const target = targets.find(t => t.id === Number(id));
@@ -71,6 +75,7 @@ export default function EditTargetScreen() {
     }
   }, [targets, habits, loaded, id]);
 
+  //This resets the goal fields whenever a different habit is chosen
   function handleHabitSelect(value: string) {
     setHabitId(Number(value));
     setGoal('');
@@ -78,6 +83,7 @@ export default function EditTargetScreen() {
     setGoalMins('');
   }
 
+  //This validates the form and saves the updated target before navigating back
   async function handleSave() {
     if (!habitId) {
       Alert.alert('Error', 'Please select a habit.');
@@ -129,6 +135,7 @@ export default function EditTargetScreen() {
         onSelect={handleHabitSelect}
       />
 
+      {/*This is the daily, weekly and monthly period toggle*/}
       <Text style={styles.label}>Period</Text>
       <View style={styles.toggle}>
         <TouchableOpacity
@@ -157,6 +164,7 @@ export default function EditTargetScreen() {
         </TouchableOpacity>
       </View>
 
+      {/*This shows hours/mins fields for time-based habits or a single numeric field for others*/}
       {isTimeHabit ? (
         <View>
           <Text style={styles.label}>Goal</Text>
@@ -198,6 +206,7 @@ export default function EditTargetScreen() {
         />
       )}
 
+      {/*This is the at least vs no more than direction toggle*/}
       <Text style={styles.label}>Direction</Text>
       <View style={styles.toggle}>
         <TouchableOpacity

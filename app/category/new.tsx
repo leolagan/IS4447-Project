@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the new category screen
 import ColourPicker from '@/components/ui/ColourPicker';
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
@@ -9,8 +10,10 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This is the default colour used when no colour has been selected yet
 const DEFAULT_COLOUR = '#10C9A0';
 
+//This lists the available icon options the user can pick for their category
 const ICONS = [
   'heart-outline', 'fitness-outline', 'book-outline', 'moon-outline', 'nutrition-outline',
   'walk-outline', 'barbell-outline', 'water-outline', 'bulb-outline', 'musical-notes-outline',
@@ -20,6 +23,7 @@ const ICONS = [
 
 type IconName = typeof ICONS[number];
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     scroll:         { flex: 1, backgroundColor: c.background },
@@ -59,6 +63,7 @@ export default function NewCategoryScreen() {
   const [colour, setColour] = useState(DEFAULT_COLOUR);
   const [selectedIcon, setSelectedIcon] = useState<IconName | null>(null);
 
+  //This validates the form and creates the new category before navigating back
   async function handleSave() {
     if (!name.trim()) {
       Alert.alert('Error', 'Please enter a category name.');
@@ -85,6 +90,7 @@ export default function NewCategoryScreen() {
 
       <ColourPicker selectedColour={colour} onSelect={setColour} />
 
+      {/*This is the icon picker grid*/}
       <Text style={styles.label}>Icon</Text>
       <View style={styles.iconGrid}>
         {ICONS.map(icon => (
@@ -105,6 +111,7 @@ export default function NewCategoryScreen() {
         ))}
       </View>
 
+      {/*This shows a live preview of the category with the selected colour and icon*/}
       <View style={styles.preview}>
         <View style={[styles.previewSwatch, { backgroundColor: colour }]}>
           {selectedIcon && (

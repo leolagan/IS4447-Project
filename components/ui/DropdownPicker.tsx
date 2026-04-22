@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the dropdown picker
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useMemo, useState } from 'react';
@@ -17,6 +18,7 @@ type Props = {
   onSelect: (value: string) => void;
 };
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container: { marginBottom: 16 },
@@ -85,6 +87,7 @@ export default function DropdownPicker({ label, options, selected, placeholder =
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
+      {/*This is the tappable selector row that opens the option list*/}
       <TouchableOpacity style={styles.selector} onPress={() => setOpen(true)} activeOpacity={0.7}>
         <Text style={[styles.selectorText, !selectedLabel && styles.placeholder]}>
           {selectedLabel ?? placeholder}
@@ -92,6 +95,7 @@ export default function DropdownPicker({ label, options, selected, placeholder =
         <Text style={styles.arrow}>▾</Text>
       </TouchableOpacity>
 
+      {/*This is the modal bottom sheet that lists all available options*/}
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
           <View style={styles.sheet}>

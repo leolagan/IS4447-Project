@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the login screen
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
@@ -5,12 +6,13 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
 import { users } from '@/db/schema';
-import * as Crypto from 'expo-crypto';
 import { eq } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     flex:       { flex: 1, backgroundColor: c.background },
@@ -39,6 +41,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  //This looks up the user by username, hashes the entered password and compares it against the stored hash
   async function handleLogin() {
     setError(null);
     if (!username.trim() || !password) {
@@ -56,11 +59,13 @@ export default function LoginScreen() {
       return;
     }
 
+    //This stores the logged in user in context and sends them to the main app
     setUser({ id: user.id, username: user.username });
     router.replace('/(tabs)');
   }
 
   return (
+    //This shifts the layout up on iOS when the keyboard appears
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -70,6 +75,7 @@ export default function LoginScreen() {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
+        {/*This shows the logo and app name*/}
         <View style={styles.header}>
           <Image
             source={require('@/assets/images/icon.png')}
@@ -83,6 +89,7 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>Log in to continue</Text>
         <View style={styles.divider} />
 
+        {/*This renders the username and password inputs*/}
         <FormField
           label="Username"
           placeholder="Enter your username"
@@ -98,10 +105,12 @@ export default function LoginScreen() {
           secureTextEntry
         />
 
+        {/*This shows a validation or auth error if one exists*/}
         {error && <Text style={styles.error}>{error}</Text>}
 
         <PrimaryButton title="Log In" onPress={handleLogin} />
 
+        {/*This links to the register screen for new users*/}
         <TouchableOpacity
           style={styles.switchRow}
           onPress={() => router.replace('/(auth)/register')}

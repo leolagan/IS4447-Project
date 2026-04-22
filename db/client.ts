@@ -1,8 +1,10 @@
+//This opens the SQLite database and creates all five tables if they do not already exist
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { openDatabaseSync } from 'expo-sqlite';
 
 const sqlite = openDatabaseSync('habittracker_v2.db');
 
+//This creates the users table
 sqlite.execSync(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,6 +13,7 @@ sqlite.execSync(`
   );
 `);
 
+//This creates the categories table
 sqlite.execSync(`
   CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,8 +24,10 @@ sqlite.execSync(`
   );
 `);
 
+//This adds the icon column to categories if it was missing from an older database version
 try { sqlite.execSync(`ALTER TABLE categories ADD COLUMN icon TEXT`); } catch {}
 
+//This creates the habits table
 sqlite.execSync(`
   CREATE TABLE IF NOT EXISTS habits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,6 +39,7 @@ sqlite.execSync(`
   );
 `);
 
+//This creates the habit_logs table
 sqlite.execSync(`
   CREATE TABLE IF NOT EXISTS habit_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,6 +51,7 @@ sqlite.execSync(`
   );
 `);
 
+//This creates the targets table
 sqlite.execSync(`
   CREATE TABLE IF NOT EXISTS targets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,4 +63,5 @@ sqlite.execSync(`
   );
 `);
 
+//This creates the Drizzle ORM client from the SQLite connection
 export const db = drizzle(sqlite);

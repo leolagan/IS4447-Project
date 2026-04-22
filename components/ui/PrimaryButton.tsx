@@ -1,3 +1,4 @@
+//This imports the theme context needed to colour the button
 import { useTheme } from '@/context/ThemeContext';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
@@ -11,6 +12,7 @@ type Props = {
 export default function PrimaryButton({ title, onPress, variant = 'primary', disabled = false }: Props) {
   const { colours } = useTheme();
 
+  //This picks the background colour based on the variant prop
   const bg = variant === 'edit'
     ? colours.edit
     : variant === 'danger'
@@ -31,6 +33,7 @@ export default function PrimaryButton({ title, onPress, variant = 'primary', dis
   );
 }
 
+//This is the static stylesheet for the button
 const styles = StyleSheet.create({
   btn: {
     borderRadius: 14,

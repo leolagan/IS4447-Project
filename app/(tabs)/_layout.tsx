@@ -1,10 +1,12 @@
+//This imports all the components and contexts needed for the tab layout
+import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AppColours } from '@/constants/theme';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     header:      { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 16 },
@@ -34,6 +36,8 @@ export default function TabsLayout() {
           borderBottomColor: colours.border,
           borderBottomWidth: StyleSheet.hairlineWidth,
         },
+        
+        //This shows the logo and app name on the left side of every tab header
         headerLeft: () => (
           <View style={styles.header}>
             <Image source={require('@/assets/images/icon.png')} style={styles.headerLogo} />
@@ -41,6 +45,8 @@ export default function TabsLayout() {
           </View>
         ),
         headerTitle: () => null,
+        
+        //This shows a profile icon on the right that navigates to the settings screen
         headerRight: () => (
           <TouchableOpacity
             style={styles.headerRight}
@@ -53,6 +59,7 @@ export default function TabsLayout() {
         ),
       }}
     >
+      {/*This defines the four main tabs of the app*/}
       <Tabs.Screen
         name="index"
         options={{

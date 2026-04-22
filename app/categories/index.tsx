@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the categories screen
 import { AppColours } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { db } from '@/db/client';
@@ -9,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container:      { flex: 1, backgroundColor: c.background },
@@ -69,6 +71,7 @@ export default function CategoriesScreen() {
   const styles = useMemo(() => makeStyles(colours), [colours]);
   const [habitCounts, setHabitCounts] = useState<Record<number, number>>({});
 
+  //This counts how many habits use each category so the count can be shown on each card
   useEffect(() => {
     async function loadCounts() {
       const all = await db.select().from(habits);
@@ -81,6 +84,7 @@ export default function CategoriesScreen() {
     loadCounts();
   }, [categories]);
 
+  //This shows a confirmation dialog before deleting a category
   async function confirmDelete(id: number, name: string) {
     Alert.alert('Delete Category', `Delete "${name}"?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -95,6 +99,7 @@ export default function CategoriesScreen() {
     ]);
   }
 
+  //This shows a spinner while categories are loading
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -103,6 +108,7 @@ export default function CategoriesScreen() {
     );
   }
 
+  //This shows an error message if something went wrong fetching categories
   if (error) {
     return (
       <View style={styles.centered}>
@@ -132,7 +138,9 @@ export default function CategoriesScreen() {
         renderItem={({ item, index }) => {
           const count = habitCounts[item.id] ?? 0;
           return (
+            //This animates each card in with a staggered fade when the list renders
             <Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+              {/*This renders each category with its colour swatch, icon, name and habit count*/}
               <View style={styles.card}>
                 <View style={[styles.swatch, { backgroundColor: item.color }]}>
                   {item.icon && (
@@ -168,12 +176,14 @@ export default function CategoriesScreen() {
           );
         }}
         ListEmptyComponent={
+          //This shows an empty state when no categories exist
           <View style={styles.emptyContainer}>
             <Text style={styles.empty}>No categories yet. Tap + to add one.</Text>
           </View>
         }
       />
 
+      {/*This is the + button to add a new category*/}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push('/category/new')}

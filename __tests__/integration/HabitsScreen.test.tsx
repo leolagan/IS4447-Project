@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
+import React from 'react';
 
+//This swaps expo-sqlite for an in-memory database so tests run in Node without a real device
 jest.mock('expo-sqlite', () => {
   const Database = require('better-sqlite3');
   const sqlite = new Database(':memory:');
@@ -11,7 +12,7 @@ jest.mock('expo-sqlite', () => {
         sqlite.exec(sql);
       },
       prepareSync(sql: string) {
-        const stmt    = sqlite.prepare(sql);
+        const stmt = sqlite.prepare(sql);
         return {
           executeSync(params: unknown[] = []) {
             let cached: ReturnType<typeof stmt.run> | null = null;
@@ -33,6 +34,7 @@ jest.mock('expo-sqlite', () => {
   };
 });
 
+//This maps useFocusEffect to useEffect since there is no navigation stack in tests
 jest.mock('@react-navigation/native', () => ({
   useFocusEffect: (cb: () => unknown) => {
     const ReactLib = require('react');
@@ -40,14 +42,17 @@ jest.mock('@react-navigation/native', () => ({
   },
 }));
 
+//This provides a logged in user so the screen doesn't get blocked by auth checks
 jest.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 1, username: 'Demo' } }),
 }));
 
+//This returns empty categories as they aren't relevant to these tests
 jest.mock('@/hooks/useCategories', () => ({
   useCategories: () => ({ categories: [] }),
 }));
 
+//This stubs out the log hook so the screen can render without needing real log data
 jest.mock('@/hooks/useLogs', () => ({
   useLogs: () => ({
     logs: [],
@@ -57,6 +62,7 @@ jest.mock('@/hooks/useLogs', () => ({
   }),
 }));
 
+//This supplies a colour palette so themed components render without errors
 jest.mock('@/context/ThemeContext', () => ({
   useTheme: () => ({
     colours: {
@@ -70,18 +76,22 @@ jest.mock('@/context/ThemeContext', () => ({
   }),
 }));
 
+//This stops the router from throwing when the screen tries to navigate
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
-import { seedIfEmpty } from '@/db/seed';
+//These are imported after the mocks so they use the fakes set up above
 import HabitsScreen from '@/app/(tabs)/index';
+import { seedIfEmpty } from '@/db/seed';
 
+//This fills the database with sample data before any of the tests run
 beforeAll(async () => {
   await seedIfEmpty();
 });
 
 describe('HabitsScreen integration', () => {
+  //This checks the screen renders its main heading
   it('renders the My Habits title', async () => {
     const { getByText } = render(<HabitsScreen />);
     await waitFor(() => {
@@ -89,6 +99,7 @@ describe('HabitsScreen integration', () => {
     });
   });
 
+  //This checks that habits from the seed data actually appear in the UI
   it('displays habit names loaded from the real in-memory database', async () => {
     const { getByText } = render(<HabitsScreen />);
     await waitFor(() => {

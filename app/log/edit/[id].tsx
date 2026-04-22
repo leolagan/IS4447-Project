@@ -1,14 +1,16 @@
+//This imports all the components and contexts needed for the edit log screen
 import FormField from '@/components/ui/FormField';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import { AppColours } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
 import { useHabitsContext } from '@/context/HabitsContext';
+import { useTheme } from '@/context/ThemeContext';
 import { useLogs } from '@/hooks/useLogs';
 import { formatDisplayDate, isValidDisplayDate, parseDisplayDate } from '@/utils/dateHelpers';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container:        { flex: 1, backgroundColor: c.background, padding: 16, paddingTop: 56 },
@@ -47,6 +49,7 @@ export default function EditLogScreen() {
 
   const habit = habits.find(h => h.id === habitId);
 
+  //This loads the existing log's values into the form fields when the screen mounts
   useEffect(() => {
     const log = logs.find(l => l.id === Number(id));
     if (log) {
@@ -60,6 +63,7 @@ export default function EditLogScreen() {
     }
   }, [logs, id]);
 
+  //This validates the form, converts the value to the correct format, and saves the updated log
   async function handleSave() {
     if (!date.trim()) {
       Alert.alert('Error', 'Please enter a date.');
@@ -90,6 +94,7 @@ export default function EditLogScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Edit Log</Text>
 
+        {/*This shows the habit name as a badge at the top of the form*/}
         {habit && (
           <View style={styles.habitBadge}>
             <Text style={styles.habitBadgeText}>{habit.name}</Text>
@@ -103,6 +108,7 @@ export default function EditLogScreen() {
           onChangeText={setDate}
         />
 
+        {/*This shows a boolean toggle, hours/mins fields or a single value field depending on the habit type*/}
         {habit?.metricType === 'boolean' ? (
           <View style={styles.boolRow}>
             <Text style={styles.label}>Done?</Text>

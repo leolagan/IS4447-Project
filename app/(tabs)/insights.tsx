@@ -1,3 +1,4 @@
+//This imports all the components and contexts needed for the insights screen
 import QuoteCard from '@/components/habits/QuoteCard';
 import DropdownPicker from '@/components/ui/DropdownPicker';
 import { AppColours } from '@/constants/theme';
@@ -16,6 +17,7 @@ type ChartBar = { label: string; value: number };
 type Log = typeof habitLogs.$inferSelect;
 type Habit = typeof habits.$inferSelect;
 
+//This formats a y-axis tick label based on the habit's unit and metric type
 function formatYLabel(value: number, unit: string, metricType: string): string {
   if (value === 0) return '0';
   if (unit === 'hrs/mins') return formatMinutes(Math.round(value));
@@ -25,11 +27,13 @@ function formatYLabel(value: number, unit: string, metricType: string): string {
   return `${value} ${unit}`;
 }
 
+//This adds up log values for a given set of entries, counting booleans as completions
 function sumLogs(logs: Log[], habit: Habit): number {
   if (habit.metricType === 'boolean') return logs.filter(l => l.value === 1).length;
   return logs.reduce((s, l) => s + l.value, 0);
 }
 
+//This builds one bar per day for the last 7 days
 function getDailyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const today = new Date();
@@ -44,11 +48,13 @@ function getDailyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   return bars;
 }
 
+//This formats a date as YYYY-MM-DD using local time to avoid timezone shifting
 function localDate(d: Date): string {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
+//This builds one bar per week for the last 8 weeks, each starting on Monday
 function getWeeklyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   const MON_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const today = new Date();
@@ -68,6 +74,7 @@ function getWeeklyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   return bars;
 }
 
+//This builds one bar per month for the last 6 months
 function getMonthlyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   const MON_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const today = new Date();
@@ -82,6 +89,7 @@ function getMonthlyBuckets(logs: Log[], habit: Habit): ChartBar[] {
   return bars;
 }
 
+//This is a custom bar chart drawn with plain Views rather than a charting library
 function BarChart({ bars, colour, unit, metricType, colours }: {
   bars: ChartBar[];
   colour: string;
@@ -99,6 +107,7 @@ function BarChart({ bars, colour, unit, metricType, colours }: {
 
   return (
     <View style={{ flexDirection: 'row' }}>
+      {/*This renders the y-axis labels*/}
       <View style={{ width: Y_WIDTH, paddingRight: 6 }}>
         <View style={{ height: CHART_H, justifyContent: 'space-between' }}>
           {ticks.map((tick, i) => (
@@ -112,6 +121,7 @@ function BarChart({ bars, colour, unit, metricType, colours }: {
 
       <View style={{ flex: 1 }}>
         <View style={{ height: CHART_H, flexDirection: 'row', alignItems: 'flex-end' }}>
+          {/*This draws horizontal gridlines at 0%, 50%, and 100% of the chart height*/}
           {[0, 0.5, 1].map((frac, i) => (
             <View
               key={`g${i}`}
@@ -128,6 +138,7 @@ function BarChart({ bars, colour, unit, metricType, colours }: {
             />
           ))}
 
+          {/*This renders the bars, with height proportional to the max value and greyed out when zero*/}
           {bars.map((bar, i) => {
             const barH = bar.value > 0
               ? Math.max((bar.value / maxVal) * CHART_H, 5)
@@ -150,6 +161,7 @@ function BarChart({ bars, colour, unit, metricType, colours }: {
           })}
         </View>
 
+        {/*This renders the x-axis labels*/}
         <View style={{ height: LABEL_H, flexDirection: 'row' }}>
           {bars.map((bar, i) => (
             <View key={i} style={{ flex: 1, alignItems: 'center', paddingTop: 5 }}>
@@ -162,6 +174,7 @@ function BarChart({ bars, colour, unit, metricType, colours }: {
   );
 }
 
+//This is a small summary card that shows a single stat with a label
 function StatCard({ label, value, colours }: { label: string; value: string; colours: typeof AppColours }) {
   const styles = useMemo(() => StyleSheet.create({
     statCard: {
@@ -191,6 +204,7 @@ function StatCard({ label, value, colours }: { label: string; value: string; col
   );
 }
 
+//This generates a stylesheet from the current theme colours
 function makeStyles(c: typeof AppColours) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: c.background },
@@ -266,6 +280,7 @@ export default function InsightsScreen() {
     [habits, selectedHabitId]
   );
 
+  //This checks if a target has direction 'max', which means a lower value is better
   const isLowerBetter = useMemo(
     () => targets.some(t => t.habitId === selectedHabitId && t.direction === 'max'),
     [targets, selectedHabitId]
@@ -275,6 +290,7 @@ export default function InsightsScreen() {
     return categories.find(c => c.id === categoryId)?.color ?? colours.primary;
   }
 
+  //This builds the habit dropdown options with their category colour
   const habitOptions = useMemo(
     () => habits.map(h => ({
       label:  h.name,
@@ -284,6 +300,7 @@ export default function InsightsScreen() {
     [habits, categories]
   );
 
+  //This recalculates the chart bars whenever the selected habit or period changes
   const chartBars = useMemo<ChartBar[]>(() => {
     if (!selectedHabit) return [];
     if (period === 'daily')   return getDailyBuckets(logs, selectedHabit);
@@ -291,6 +308,7 @@ export default function InsightsScreen() {
     return getMonthlyBuckets(logs, selectedHabit);
   }, [logs, selectedHabit, period]);
 
+  //This calculates the total, average, best, and active count from the current chart data
   const stats = useMemo(() => {
     if (!selectedHabit || chartBars.length === 0) return null;
     const { unit, metricType } = selectedHabit;
@@ -309,6 +327,7 @@ export default function InsightsScreen() {
     };
   }, [chartBars, selectedHabit, isLowerBetter]);
 
+  //This defines readable subtitles and labels that change depending on the active period
   const periodSubtitle: Record<Period, string> = {
     daily:   'Last 7 days',
     weekly:  'Last 8 weeks',
@@ -333,6 +352,7 @@ export default function InsightsScreen() {
 
   const hasData = chartBars.some(b => b.value > 0);
 
+  //This shows a spinner while logs are loading
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -341,6 +361,7 @@ export default function InsightsScreen() {
     );
   }
 
+  //This shows an error message if something went wrong fetching logs
   if (error) {
     return (
       <View style={styles.centered}>
@@ -355,6 +376,7 @@ export default function InsightsScreen() {
 
       <QuoteCard />
 
+      {/*This is the daily, weekly, and monthly period toggle*/}
       <View style={styles.toggleRow}>
         {(['daily', 'weekly', 'monthly'] as Period[]).map(p => (
           <TouchableOpacity
@@ -388,6 +410,7 @@ export default function InsightsScreen() {
             onSelect={val => setSelectedHabitId(Number(val))}
           />
 
+          {/*This is the chart card, showing a prompt if no habit is selected or a no-data message if the period is empty*/}
           <View style={styles.card}>
             {selectedHabit ? (
               <>
@@ -422,6 +445,7 @@ export default function InsightsScreen() {
             )}
           </View>
 
+          {/*This shows the summary stat cards only when there is data to display*/}
           {stats && (
             <>
               <Text style={styles.sectionLabel}>Summary</Text>
